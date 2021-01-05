@@ -186,8 +186,7 @@ app.get("/mercaderias/marca/:marca", (req, res) => {
   let limite = 20;
 
   Mercaderia.find({ marcanombre: marca })
-    .skip(desde)
-    .limit(limite)
+  	.sort({ codigo: "desc" })
     .exec((err, mercaderias) => {
       if (err) {
         return res.status(500).json({
