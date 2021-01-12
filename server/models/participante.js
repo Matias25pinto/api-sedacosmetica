@@ -82,6 +82,14 @@ let velocrossSchema = new Schema({
     type: Boolean,
     required: [true, "La categoria CAT_110K es obligatorio"],
   },
+  ATV_PRO_10: {
+    type: Boolean,
+    required: [true, "La categoria ATV_PRO_10 es obligatorio"],
+  },
+  ATV_OPEN_10: {
+    type: Boolean,
+    required: [true, "La categoria ATV_PRO_10 es obligatorio"],
+  },
 });
 let companionSchema = new Schema({
   nombre: {
@@ -152,4 +160,4 @@ participanteSchema.plugin(uniqueValidator, {
 //mongoose.model(nombre_del_documento,El_modelo_a_ser_guardado)
 //en el local = mongoose.model("ParticipantePrueba", participanteSchema)
 //en el servidor = mongoose.model("Participante", participanteSchema)
-module.exports = mongoose.model("Participante", participanteSchema); // Exportar el modelo
+module.exports = mongoose.model("Participantefinal", participanteSchema); // Exportar el modelo
