@@ -4,60 +4,64 @@ const uniqueValidator = require("mongoose-unique-validator"); // importar unique
 let Schema = mongoose.Schema; // crear esquema
 
 let rolesValidos = {
-  values: ['ADMIN_ROLE', 'USER_ROLE', 'CLIENT_ROLE'],
-  message: '{VALUE} no es un rol válido', 
+  values: ["ADMIN_ROLE", "USER_ROLE", "CLIENT_ROLE"],
+  message: "{VALUE} no es un rol válido",
 };
 
 //Creamos el objeto Schema con todas sus propiedades
 
 let usuarioSchema = new Schema({
-  nombre:{
+  nombre: {
     type: String,
-    require:[true, 'El nombre es obligatorio'],
+    require: [true, "El nombre es obligatorio"],
   },
-  apellido:{
+  apellido: {
     type: String,
-    require: [true, 'El apellido es obligatorio'],
+    require: [true, "El apellido es obligatorio"],
   },
-  cedula:{
-    type:String,
-    unique:true,
-    require: [true, 'La cédula es obligatoria'],
-  },
-  ruc:{
-    type:String,
-    require:false,
-  },
-  celular:{
-    type:Number,
-    require: [true, 'El celular es obligatorio'],
-  },
-  email:{
-    type:String,
+  cedula: {
+    type: String,
     unique: true,
-    require:[true, 'El email es obligatorio'],
+    require: [true, "La cédula es obligatoria"],
   },
-  password:{
+  ruc: {
     type: String,
-    require:[true, 'El password es obligatorio'],
- 
+    require: false,
   },
-  img:{
+  celular: {
+    type: Number,
+    require: [true, "El celular es obligatorio"],
+  },
+  email: {
     type: String,
-    require:false,
+    unique: true,
+    require: [true, "El email es obligatorio"],
   },
-  role:{
-    type:String,
-    default: 'CLIENT_ROLE',
+  password: {
+    type: String,
+    require: [true, "El password es obligatorio"],
+  },
+  img: {
+    type: String,
+    require: false,
+  },
+  role: {
+    type: String,
+    default: "CLIENT_ROLE",
     enum: rolesValidos,
   },
-  estado:{
-    type:Boolean,
+  estado: {
+    type: Boolean,
     default: true,
   },
   google: {
     type: Boolean,
     default: false,
+  },
+  sucursal: {
+    type: Schema.Types.ObjectId,
+    ref: "Sucursal",
+    required: false,
   },
 });
 
@@ -68,6 +72,6 @@ usuarioSchema.methods.toJSON = function () {
   delete userObject.password;
   return userObject;
 };
-usuarioSchema.plugin(uniqueValidator, {message: '{PATH} debe de ser único'});
+usuarioSchema.plugin(uniqueValidator, { message: "{PATH} debe de ser único" });
 
-module.exports = mongoose.model('Usuario', usuarioSchema);
+module.exports = mongoose.model("Usuario", usuarioSchema);

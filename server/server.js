@@ -29,7 +29,7 @@ mongoose.connect(
   (err, res) => {
     if (err) throw new err();
 
-    console.log("Conectado a la Base de datos sedaCosmetico");
+    console.log("Conectado a la Base de datos Seda Cosmética");
   }
 );
 

@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt"); // Importamos bcrypt para poder comparar dos p
 
 const jwt = require("jsonwebtoken"); // Importamos jwt para poder crear Json Web Tokens
 
+const { verificaToken } = require("../middlewares/autenticacion");
+
 const app = express();
 
 const Usuario = require("../models/usuario"); // Importamos usuario para hacer peticiones a usuarios
@@ -46,6 +48,15 @@ app.post("/login", (req, res) => {
       ok: true,
       token,
     });
+  });
+});
+
+app.get("/login/verificar", verificaToken, (req, res) => {
+  let usuario = req.usuario;
+
+  res.status(200).json({
+    ok: true,
+    usuario,
   });
 });
 
