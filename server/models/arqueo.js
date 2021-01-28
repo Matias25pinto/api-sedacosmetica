@@ -26,11 +26,6 @@ const arqueoSchema = new Schema({
     required: false,
     default: 0,
   },
-  sobranteCaja: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
   comprobantes: {
     type: Array,
     required: false,

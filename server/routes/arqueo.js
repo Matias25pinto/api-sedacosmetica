@@ -92,7 +92,6 @@ app.put("/arqueo/sucursal/:id", verificaToken, (req, res) => {
   let body = req.body;
   let usuarios = [];
   let montoCaja = body.montoCaja;
-  let sobranteCaja = body.sobranteCaja;
   let noAgregarUsuario = false;
 
   Arqueo.findById(id).exec((err, arqueoBD) => {
@@ -116,7 +115,7 @@ app.put("/arqueo/sucursal/:id", verificaToken, (req, res) => {
     //actualizar
     Arqueo.findByIdAndUpdate(
       id,
-      { usuarios, montoCaja, sobranteCaja },
+      { usuarios, montoCaja },
       { new: true },
       (err, arqueoUpdate) => {
         if (err) {
