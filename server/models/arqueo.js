@@ -21,11 +21,6 @@ const arqueoSchema = new Schema({
     type: Number,
     required: [true, "El totalVenta es obligatorio"],
   },
-  montoCaja: {
-    type: Number,
-    required: false,
-    default: 0,
-  },
   comprobantes: {
     type: Array,
     required: false,

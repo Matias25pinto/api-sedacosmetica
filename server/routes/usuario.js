@@ -78,11 +78,12 @@ app.put("/usuario/:id", [verificaToken, verificaRol], (req, res) => {
     "img",
     "role",
     "estado",
+    "sucursal",
   ]); //la funcion pick de undercore, permite filtrar solo las propiedades que quiero del objeto
 
   Usuario.findByIdAndUpdate(id, body, { new: true }, (err, usuarioUpdate) => {
     if (err) {
-      res.status(400).json({
+      return res.status(400).json({
         ok: false,
         err,
       });
