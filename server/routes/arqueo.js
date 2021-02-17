@@ -10,9 +10,9 @@ const Sucursal = require("../models/sucursal");
 const app = express();
 
 let corsOptions = {
-  origin: 'http://localhost:4200',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+  origin: "http://localhost:4200",
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
 
 //app.use(cors(corsOptions)); //para utilizar el cors, de esta forma cualquiera puede hacer peticiones a nuestra api
 
@@ -213,114 +213,111 @@ app.delete("/arqueo/:id", [verificaToken, verificaRol], (req, res) => {
 });
 
 //retportes
-app.get(
-  "/arqueo/reporte/ventas/:sucursal",
-  cors(),
-  (req, res) => {
-    let sucursal = req.params.sucursal;
 
-    //calcular rango de fecha
+app.get("/arqueo/reporte/ventas/:sucursal", cors(), (req, res) => {
+  let sucursal = req.params.sucursal;
 
-    let start = req.get('start');
+  //calcular rango de fecha
 
+  let start = req.get("start");
 
-    let end = req.get('end');
+  let end = req.get("end");
 
+  if (!start || !end) {
+    return res.status(500).json({
+      ok: false,
+      err: {
+        message: "Falta fecha desde o fecha hasta",
+      },
+    });
+  }
 
-    if (!start || !end) {
-      return res.status(500).json({
-        ok:false,
-        err:{
-          message:'Falta fecha desde o fecha hasta'
+  let condicion = {
+    sucursal: sucursal,
+    anulado: false,
+    fecha: { $gte: start, $lte: end },
+  };
+  Arqueo.find(condicion)
+    .populate("sucursal", "titulo")
+    .exec((err, arqueosBD) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          err,
+        });
+      }
+      if (arqueosBD.length === 0) {
+        return res.status(404).json({
+          ok: false,
+          err: {
+            message: "No existen arqueo en esta sucursal",
+          },
+        });
+      }
+      //Total de ventas
+      let ventas = 0;
+      let montoComprobantes = 0;
+      let totalCosto = 0;
+      let totalUtilidad = 0;
+      let totalGasto = 0;
+      let totalDeposito = 0;
+      let ganancia = 0;
+      let comprobantesGasto = [];
+      let comprobantesDeposito = [];
+
+      //CALCULAR LOS GASTOS
+      //Los gastos son todos los comprobantes donde sale plata de la empresa
+
+      for (const arqueo of arqueosBD) {
+        if (arqueo.comprobantes.length > 0) {
+          //NO SON GASTOS: RETIRO, TARJETA, CHEQUE, DEPOSITO
+          for (const comprobante of arqueo.comprobantes) {
+            if (
+              comprobante.comprobante != "RETIRO" &&
+              comprobante.comprobante != "TARJETA" &&
+              comprobante.comprobante != "CHEQUE" &&
+              comprobante.comprobante != "DEPOSITO"
+            ) {
+              totalGasto = totalGasto + Number(comprobante.monto);
+              comprobantesGasto.push(comprobante);
+            }
+            if (comprobante.comprobante == "DEPOSITO") {
+              totalDeposito = totalDeposito + Number(comprobante.monto);
+              comprobantesDeposito.push(comprobante);
+            }
+            montoComprobantes = montoComprobantes + Number(comprobante.monto);
+          }
         }
-      })
-    }
-    
-    let condicionFecha = { fecha: { $gte: start, $lte: end } };
-    let condicion = {
-      sucursal: sucursal,
-      anulado: false,
-      fecha: { $gte: start, $lte: end },
-    };
-    Arqueo.find(condicion)
-      .populate("sucursal", "titulo")
-      .exec((err, arqueosBD) => {
+        ventas = ventas + arqueo.venta;
+        totalCosto = totalCosto + arqueo.totalCosto;
+        totalUtilidad = totalUtilidad + arqueo.totalUtilidad;
+        ganancia = totalUtilidad - totalGasto;
+      }
+      //Nombre de la sucursal
+      Sucursal.findById({ _id: sucursal }, (err, sucursalBD) => {
         if (err) {
           return res.status(500).json({
             ok: false,
             err,
           });
         }
-        if (arqueosBD.length === 0) {
-          return res.status(404).json({
-            ok: false,
-            err: {
-              message: "No existen arqueo en esta sucursal",
-            },
-          });
-        }
-        //Total de ventas
-        let ventas = 0;
-        let montoComprobantes = 0;
-        let totalCosto = 0;
-        let totalUtilidad = 0;
-        let totalGasto = 0;
-        let totalDeposito = 0;
-        let ganancia = 0;
-        let comprobantesGasto = [];
-
-        //CALCULAR LOS GASTOS
-        //Los gastos son todos los comprobantes donde sale plata de la empresa
-
-        for (const arqueo of arqueosBD) {
-          if (arqueo.comprobantes.length > 0) {
-            //NO SON GASTOS: RETIRO, TARJETA, CHEQUE, DEPOSITO
-            for (const comprobante of arqueo.comprobantes) {
-              if (
-                comprobante.comprobante != "RETIRO" &&
-                comprobante.comprobante != "TARJETA" &&
-                comprobante.comprobante != "CHEQUE" &&
-                comprobante.comprobante != "DEPOSITO"
-              ) {
-                totalGasto = totalGasto + Number(comprobante.monto);
-                comprobantesGasto.push(comprobante);
-              }
-              if (comprobante.comprobante == "DEPOSITO") {
-                totalDeposito = totalDeposito + Number(comprobante.monto);
-              }
-              montoComprobantes = montoComprobantes + Number(comprobante.monto);
-            }
-          }
-          ventas = ventas + arqueo.venta;
-          totalCosto = totalCosto + arqueo.totalCosto;
-          totalUtilidad = totalUtilidad + arqueo.totalUtilidad;
-          ganancia = totalUtilidad - totalGasto;
-        }
-        //Nombre de la sucursal
-        Sucursal.findById({ _id: sucursal }, (err, sucursalBD) => {
-          if (err) {
-            return res.status(500).json({
-              ok: false,
-              err,
-            });
-          }
-          res.status(200).json({
-            ok: true,
-            sucursal: sucursalBD.titulo,
-            desde: start,
-            hasta: end,
-            ventaNeta: ventas,
-            costo: totalCosto,
-            totalUtilidad,
-            totalGasto,
-            totalDeposito,
-            montoComprobantes,
-            ganancia,
-            comprobantesGasto
-          });
+        res.status(200).json({
+          ok: true,
+          sucursal: sucursalBD.titulo,
+          desde: start,
+          hasta: end,
+          ventaNeta: ventas,
+          costo: totalCosto,
+          totalUtilidad,
+          totalGasto,
+          totalDeposito,
+          montoComprobantes,
+          ganancia,
+          comprobantesGasto,
+          comprobantesDeposito,
         });
       });
-  }
-);
+    });
+});
 
 module.exports = app;
