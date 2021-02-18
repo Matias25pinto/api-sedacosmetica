@@ -231,12 +231,21 @@ app.get("/arqueo/reporte/ventas/:sucursal", cors(), (req, res) => {
       },
     });
   }
+  let condicion = {};
+  if (start === end) {
+    condicion = {
+      sucursal: sucursal,
+      anulado: false,
+      fecha: start,
+    };
+  } else {
+    condicion = {
+      sucursal: sucursal,
+      anulado: false,
+      fecha: { $gte: start, $lte: end },
+    };
+  }
 
-  let condicion = {
-    sucursal: sucursal,
-    anulado: false,
-    fecha: { $gte: start, $lte: end },
-  };
   Arqueo.find(condicion)
     .populate("sucursal", "titulo")
     .exec((err, arqueosBD) => {
