@@ -232,7 +232,7 @@ app.get("/arqueo/reporte/ventas/:sucursal", cors(), (req, res) => {
     });
   }
   let condicion = {};
-  if (start === end) {
+  if (start == end) {
     condicion = {
       sucursal: sucursal,
       anulado: false,
