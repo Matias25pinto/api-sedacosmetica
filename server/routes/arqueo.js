@@ -248,10 +248,6 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
     };
   }
 
-  return res.json({
-    ok:true,
-    condicion
-  })
   Arqueo.find(condicion)
     .populate("sucursal", "titulo")
     .exec((err, arqueosBD) => {
@@ -261,13 +257,14 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
           err,
         });
       }
-      if (arqueosBD.length === 0) {
+      if (!arqueosBD) {
         return res.status(404).json({
           ok: false,
           err: {
             message: "No existen arqueo en esta sucursal",
             start,
             end,
+            arqueos:arqueosBD
           },
         });
       }
