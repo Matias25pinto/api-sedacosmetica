@@ -214,20 +214,34 @@ app.delete("/arqueo/:id", [verificaToken, verificaRol], (req, res) => {
 
 //retportes
 
-app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
-  let sucursal = req.params.sucursal;
-
-  //calcular rango de fecha
+function fecha_formatISODate(fechaString) {
   /**
    * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
    * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
    * **/
-  let fechaStart = req.get("start") + "T03:00:00.000Z";
-  let fechaEnd = req.get("start") + "T03:00:00.000Z";
+  let arrelgoFecha = fechaString.split("-");
+  let dd = arrelgoFecha[2];
+  let mm = arrelgoFecha[1];
+  let yyyy = arrelgoFecha[0];
 
-  let start = new Date(fechaStart);
+  if (dd < 10 && dd.length == 1) {
+    dd = "0" + dd;
+  }
+  if (mm < 10 && mm.length == 1) {
+    mm = "0" + mm;
+  }
+  let fecha = `${yyyy}-${mm}-${dd}T03:00:00.000Z`;
+  return fecha;
+}
 
-  let end = new Date(fechaEnd);
+app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
+  let sucursal = req.params.sucursal;
+
+  //calcular rango de fecha
+
+  let start = fecha_formatISODate(req.get("start"));
+
+  let end = fecha_formatISODate(req.get("end"));
 
   if (!start || !end) {
     return res.status(500).json({
