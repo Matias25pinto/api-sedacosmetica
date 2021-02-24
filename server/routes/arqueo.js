@@ -214,14 +214,14 @@ app.delete("/arqueo/:id", [verificaToken, verificaRol], (req, res) => {
 
 //retportes
 
-app.get("/arqueo/reporte/ventas/:sucursal", cors(), (req, res) => {
+app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
   let sucursal = req.params.sucursal;
 
   //calcular rango de fecha
 
-  let start = req.get("start");
+  let start = `'${req.get("start")}'`;
 
-  let end = req.get("end");
+  let end = `'${req.get("end")}'`;
 
   if (!start || !end) {
     return res.status(500).json({
