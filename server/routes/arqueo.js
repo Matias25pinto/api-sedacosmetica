@@ -231,7 +231,9 @@ app.get("/arqueo/reporte/ventas/:sucursal", cors(), (req, res) => {
       },
     });
   }
+
   let condicion = {};
+  //si es igual enviar solo una fecha
   if (start == end) {
     condicion = {
       sucursal: sucursal,
@@ -260,6 +262,8 @@ app.get("/arqueo/reporte/ventas/:sucursal", cors(), (req, res) => {
           ok: false,
           err: {
             message: "No existen arqueo en esta sucursal",
+            start,
+            end,
           },
         });
       }
