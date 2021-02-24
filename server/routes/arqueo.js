@@ -218,17 +218,16 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
   let sucursal = req.params.sucursal;
 
   //calcular rango de fecha
+  /**
+   * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
+   * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
+   * **/
+  let fechaStart = req.get("start") + "T03:00:00.000Z";
+  let fechaEnd = req.get("start") + "T03:00:00.000Z";
 
-  let start = new Date(`"${req.get("start")}"`);
+  let start = new Date(fechaStart);
 
-  let end = new Date(`"${req.get("end")}"`);
-
-  return res.status(200).json({
-    ok: true,
-    message: "prueba de formato de fechas",
-    start,
-    end,
-  });
+  let end = new Date(fechaEnd);
 
   if (!start || !end) {
     return res.status(500).json({
