@@ -247,7 +247,7 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
           err,
         });
       }
-      if (!arqueosBD) {
+      if (arqueosBD.length == 0) {
         return res.status(404).json({
           ok: false,
           err: {
