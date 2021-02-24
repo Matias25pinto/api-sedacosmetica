@@ -231,22 +231,12 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
       },
     });
   }
-
-  let condicion = {};
-  //si es igual enviar solo una fecha
-  if (start == end) {
-    condicion = {
-      sucursal: sucursal,
-      anulado: false,
-      fecha: start,
-    };
-  } else {
-    condicion = {
-      sucursal: sucursal,
-      anulado: false,
-      fecha: { $gte: start, $lte: end },
-    };
-  }
+  //{ $gte: start, $lte: end }, la fecha debe ser mayor o igual que y menor o igual que
+  let condicion = {
+    sucursal: sucursal,
+    anulado: false,
+    fecha: { $gte: start, $lte: end },
+  };
 
   Arqueo.find(condicion)
     .populate("sucursal", "titulo")
@@ -264,7 +254,7 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
             message: "No existen arqueo en esta sucursal",
             start,
             end,
-            arqueos:arqueosBD
+            arqueos: arqueosBD,
           },
         });
       }
