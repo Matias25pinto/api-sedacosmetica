@@ -219,9 +219,9 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
 
   //calcular rango de fecha
 
-  let start = `'${req.get("start")}'`;
+  let start = new Date(`"${req.get("start")}"`);
 
-  let end = `'${req.get("end")}'`;
+  let end = new Date(`"${req.get("end")}"`);
 
   if (!start || !end) {
     return res.status(500).json({
@@ -231,6 +231,7 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
       },
     });
   }
+
   //{ $gte: start, $lte: end }, la fecha debe ser mayor o igual que y menor o igual que
   let condicion = {
     sucursal: sucursal,
