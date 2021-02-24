@@ -223,6 +223,13 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
 
   let end = new Date(`"${req.get("end")}"`);
 
+  return res.status(200).json({
+    ok: true,
+    message: "prueba de formato de fechas",
+    start,
+    end,
+  });
+
   if (!start || !end) {
     return res.status(500).json({
       ok: false,
