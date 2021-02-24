@@ -248,6 +248,10 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
     };
   }
 
+  return res.json({
+    ok:true,
+    condicion
+  })
   Arqueo.find(condicion)
     .populate("sucursal", "titulo")
     .exec((err, arqueosBD) => {
