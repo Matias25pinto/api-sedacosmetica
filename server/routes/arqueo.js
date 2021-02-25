@@ -6,6 +6,7 @@ const { verificaRol, verificaToken } = require("../middlewares/autenticacion");
 
 const Arqueo = require("../models/arqueo");
 const Sucursal = require("../models/sucursal");
+const { find } = require("../models/arqueo");
 
 const app = express();
 
@@ -65,11 +66,9 @@ app.get("/arqueos", verificaToken, (req, res) => {
 
 app.post("/arqueo", [verificaToken, verificaRol], (req, res) => {
   let body = req.body;
-  //let fecha = new Date(body.fecha);
-  let fecha = body.fecha;
+  let fecha = new Date(fecha_formatISODate(body.fecha));
   let totalUtilidad = body.venta - body.totalCosto;
   let usuarios = [req.usuario];
-  console.log(fecha);
   let arqueo = new Arqueo({
     sucursal: body.sucursal,
     fecha,
@@ -146,6 +145,7 @@ app.put(
 app.put("/arqueo/comprobantes/:id", verificaToken, (req, res) => {
   let id = req.params.id;
   let body = req.body;
+  body.fecha = new Date(fecha_formatISODate(body.fecha));
   let comprobantes = [];
   let usuarios = [];
   let noAgregarUsuario = false;
@@ -213,26 +213,6 @@ app.delete("/arqueo/:id", [verificaToken, verificaRol], (req, res) => {
 });
 
 //retportes
-
-function fecha_formatISODate(fechaString) {
-  /**
-   * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
-   * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
-   * **/
-  let arrelgoFecha = fechaString.split("-");
-  let dd = arrelgoFecha[2];
-  let mm = arrelgoFecha[1];
-  let yyyy = arrelgoFecha[0];
-
-  if (dd < 10 && dd.length == 1) {
-    dd = "0" + dd;
-  }
-  if (mm < 10 && mm.length == 1) {
-    mm = "0" + mm;
-  }
-  let fecha = `${yyyy}-${mm}-${dd}T03:00:00.000Z`;
-  return fecha;
-}
 
 app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
   let sucursal = req.params.sucursal;
@@ -343,6 +323,95 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
         });
       });
     });
+});
+//Funciones
+function fecha_formatISODate(fechaString) {
+  /**
+   * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
+   * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
+   * **/
+  let arrelgoFecha = fechaString.split("-");
+  let dd = arrelgoFecha[2];
+  let mm = arrelgoFecha[1];
+  let yyyy = arrelgoFecha[0];
+
+  if (dd < 10 && dd.length == 1) {
+    dd = "0" + dd;
+  }
+  if (mm < 10 && mm.length == 1) {
+    mm = "0" + mm;
+  }
+  let fecha = `${yyyy}-${mm}-${dd}T03:00:00.000Z`;
+  return fecha;
+}
+//Pruebas
+//buscar T4
+app.get("/buscar", (req, res) => {
+  Arqueo.find().exec((err, arqueosBD) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err,
+      });
+    }
+    let fechas = [];
+    for (const arqueo of arqueosBD) {
+      let cadenaFecha = new String(arqueo.fecha);
+
+      if (fechas.indexOf(cadenaFecha) < 0) {
+        fechas.push(cadenaFecha);
+      }
+    }
+
+    res.status(200).json({
+      ok: true,
+      fechas,
+    });
+  });
+});
+
+//Cambiar el T3 a T0
+app.get("/cambiarT", (req, res) => {
+  Arqueo.find().exec((err, arqueosBD) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err,
+      });
+    }
+    let fechas = [];
+    let fechaprueba = [];
+    for (const arqueo of arqueosBD) {
+      let fecha = new Date(arqueo.fecha);
+      let dd = fecha.getDate();
+      let MM = fecha.getMonth();
+      let yyyy = fecha.getFullYear();
+
+      let fechaISO = fecha_formatISODate(`${yyyy}-${MM + 1}-${dd}`);
+
+      let newFecha = new Date(fechaISO);
+      let options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      if (dd == "24" && MM + 1 == "2") {
+        fechaprueba.push(arqueo.fecha);
+        fechaprueba.push(fecha);
+        fechaprueba.push(fechaISO);
+        fechaprueba.push(fecha.toLocaleString("py-PY", options));
+        fechaprueba.push(newFecha.toLocaleString("us-US", options));
+      }
+
+      fechas.push(newFecha.toLocaleString("py-PY", options));
+    }
+
+    res.status(200).json({
+      ok: true,
+      fechaprueba,
+    });
+  });
 });
 
 module.exports = app;
