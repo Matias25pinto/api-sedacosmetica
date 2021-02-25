@@ -66,7 +66,11 @@ app.get("/arqueos", verificaToken, (req, res) => {
 
 app.post("/arqueo", [verificaToken, verificaRol], (req, res) => {
   let body = req.body;
-  let fecha = new Date(fecha_formatISODate(body.fecha));
+  let fechaBody = new Date(body.fecha);
+  let yyyy = fechaBody.getFullYear();
+  let MM = fechaBody.getMonth();
+  let dd = fechaBody.getDate();
+  let fecha = new Date(fecha_formatISODate(`${yyyy}-${MM + 1}-${dd}`));
   let totalUtilidad = body.venta - body.totalCosto;
   let usuarios = [req.usuario];
   let arqueo = new Arqueo({
@@ -145,7 +149,12 @@ app.put(
 app.put("/arqueo/comprobantes/:id", verificaToken, (req, res) => {
   let id = req.params.id;
   let body = req.body;
-  body.fecha = new Date(fecha_formatISODate(body.fecha));
+  let fechaBody = new Date(body.fecha);
+  let yyyy = fechaBody.getFullYear();
+  let MM = fechaBody.getMonth();
+  let dd = fechaBody.getDate();
+  let fecha = new Date(fecha_formatISODate(`${yyyy}-${MM + 1}-${dd}`));
+  body.fecha = fecha;
   let comprobantes = [];
   let usuarios = [];
   let noAgregarUsuario = false;
