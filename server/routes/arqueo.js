@@ -257,56 +257,70 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
           err,
         });
       }
-      if (arqueosBD.length == 0) {
-        return res.status(404).json({
-          ok: false,
-          err: {
-            message: "No existen arqueo en esta sucursal",
-            start,
-            end,
-            arqueos: arqueosBD,
-          },
-        });
-      }
       //Total de ventas
       let ventas = 0;
       let montoComprobantes = 0;
       let totalCosto = 0;
       let totalUtilidad = 0;
       let totalGasto = 0;
+      let totalRetiro = 0;
+      let totalTarjeta = 0;
+      let totalCheque = 0;
       let totalDeposito = 0;
       let ganancia = 0;
       let comprobantesGasto = [];
+      let comprobanteRetiro = [];
+      let comprobanteTarjeta = [];
+      let comprobanteCheque = [];
       let comprobantesDeposito = [];
+      let existeArqueo = true;
+      if (arqueosBD.length == 0) {
+        existeArqueo = false;
+      }
 
       //CALCULAR LOS GASTOS
       //Los gastos son todos los comprobantes donde sale plata de la empresa
+      if (existeArqueo) {
+        for (const arqueo of arqueosBD) {
+          if (arqueo.comprobantes.length > 0) {
+            //NO SON GASTOS: RETIRO, TARJETA, CHEQUE, DEPOSITO
+            for (const comprobante of arqueo.comprobantes) {
+              if (
+                comprobante.comprobante != "RETIRO" &&
+                comprobante.comprobante != "TARJETA" &&
+                comprobante.comprobante != "CHEQUE" &&
+                comprobante.comprobante != "DEPOSITO"
+              ) {
+                totalGasto = totalGasto + Number(comprobante.monto);
+                comprobantesGasto.push(comprobante);
+              }
+              if (comprobante.comprobante == "RETIRO") {
+                totalRetiro = totalRetiro + Number(comprobante.monto);
+                comprobanteRetiro.push(comprobante);
+              }
+              if (comprobante.comprobante == "TARJETA") {
+                totalTarjeta = totalTarjeta + Number(comprobante.monto);
+                comprobanteTarjeta.push(comprobante);
+              }
+              if (comprobante.comprobante == "CHEQUE") {
+                totalCheque = totalCheque + Number(compronbate.monto);
+                comprobanteCheque.push(comprobante);
+              }
+              if (comprobante.comprobante == "DEPOSITO") {
+                totalDeposito = totalDeposito + Number(comprobante.monto);
+                comprobantesDeposito.push(comprobante);
+              }
 
-      for (const arqueo of arqueosBD) {
-        if (arqueo.comprobantes.length > 0) {
-          //NO SON GASTOS: RETIRO, TARJETA, CHEQUE, DEPOSITO
-          for (const comprobante of arqueo.comprobantes) {
-            if (
-              comprobante.comprobante != "RETIRO" &&
-              comprobante.comprobante != "TARJETA" &&
-              comprobante.comprobante != "CHEQUE" &&
-              comprobante.comprobante != "DEPOSITO"
-            ) {
-              totalGasto = totalGasto + Number(comprobante.monto);
-              comprobantesGasto.push(comprobante);
+              montoComprobantes = montoComprobantes + Number(comprobante.monto);
             }
-            if (comprobante.comprobante == "DEPOSITO") {
-              totalDeposito = totalDeposito + Number(comprobante.monto);
-              comprobantesDeposito.push(comprobante);
-            }
-            montoComprobantes = montoComprobantes + Number(comprobante.monto);
           }
+          ventas = ventas + arqueo.venta;
+          totalCosto = totalCosto + arqueo.totalCosto;
+          totalUtilidad = totalUtilidad + arqueo.totalUtilidad;
+          ganancia = totalUtilidad - totalGasto;
         }
-        ventas = ventas + arqueo.venta;
-        totalCosto = totalCosto + arqueo.totalCosto;
-        totalUtilidad = totalUtilidad + arqueo.totalUtilidad;
-        ganancia = totalUtilidad - totalGasto;
       }
+
       //Nombre de la sucursal
       Sucursal.findById({ _id: sucursal }, (err, sucursalBD) => {
         if (err) {
@@ -324,10 +338,16 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
           costo: totalCosto,
           totalUtilidad,
           totalGasto,
+          totalRetiro,
+          totalTarjeta,
+          totalCheque,
           totalDeposito,
           montoComprobantes,
           ganancia,
           comprobantesGasto,
+          comprobanteRetiro,
+          comprobanteTarjeta,
+          comprobanteCheque,
           comprobantesDeposito,
         });
       });
