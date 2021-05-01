@@ -70,7 +70,7 @@ app.post("/arqueo", [verificaToken, verificaRol], (req, res) => {
   let yyyy = fechaBody.getFullYear();
   let MM = fechaBody.getMonth();
   let dd = fechaBody.getDate();
-  let fecha = new Date(fecha_formatISODate(`${yyyy}-${MM + 1}-${dd}`));
+  let fecha = new Date(fechaFormatISODate(`${yyyy}-${MM + 1}-${dd}`));
   let totalUtilidad = body.venta - body.totalCosto;
   let usuarios = [req.usuario];
   let arqueo = new Arqueo({
@@ -149,12 +149,12 @@ app.put(
 app.put("/arqueo/comprobantes/:id", verificaToken, (req, res) => {
   let id = req.params.id;
   let body = req.body;
-  let fechaBody = new Date(body.fecha);
+  let fechaBody = new Date(body.fPago);
   let yyyy = fechaBody.getFullYear();
   let MM = fechaBody.getMonth();
   let dd = fechaBody.getDate();
-  let fecha = new Date(fecha_formatISODate(`${yyyy}-${MM + 1}-${dd}`));
-  body.fecha = fecha;
+  let fPago = new Date(fechaFormatISODate(`${yyyy}-${MM + 1}-${dd}`));
+  body.fPago = fPago;
   let comprobantes = [];
   let usuarios = [];
   let noAgregarUsuario = false;
@@ -228,9 +228,9 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
 
   //calcular rango de fecha
 
-  let start = fecha_formatISODate(req.get("start"));
+  let start = fechaFormatISODate(req.get("start"));
 
-  let end = fecha_formatISODate(req.get("end"));
+  let end = fechaFormatISODate(req.get("end"));
 
   if (!start || !end) {
     return res.status(500).json({
@@ -291,27 +291,27 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
                 comprobante.comprobante != "CHEQUE" &&
                 comprobante.comprobante != "DEPOSITO"
               ) {
-                totalGasto = totalGasto + Number(comprobante.monto);
+                totalGasto = totalGasto + numberFormat(comprobante.monto);
                 comprobantesGasto.push(comprobante);
               }
               if (comprobante.comprobante == "RETIRO") {
-                totalRetiro = totalRetiro + Number(comprobante.monto);
+                totalRetiro = totalRetiro + numberFormat(comprobante.monto);
                 comprobanteRetiro.push(comprobante);
               }
               if (comprobante.comprobante == "TARJETA") {
-                totalTarjeta = totalTarjeta + Number(comprobante.monto);
+                totalTarjeta = totalTarjeta + numberFormat(comprobante.monto);
                 comprobanteTarjeta.push(comprobante);
               }
               if (comprobante.comprobante == "CHEQUE") {
-                totalCheque = totalCheque + Number(compronbate.monto);
+                totalCheque = totalCheque + numberFormat(comprobante.monto);
                 comprobanteCheque.push(comprobante);
               }
               if (comprobante.comprobante == "DEPOSITO") {
-                totalDeposito = totalDeposito + Number(comprobante.monto);
+                totalDeposito = totalDeposito + numberFormat(comprobante.monto);
                 comprobantesDeposito.push(comprobante);
               }
-
-              montoComprobantes = montoComprobantes + Number(comprobante.monto);
+              montoComprobantes =
+                montoComprobantes + numberFormat(comprobante.monto);
             }
           }
           ventas = ventas + arqueo.venta;
@@ -320,7 +320,6 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
           ganancia = totalUtilidad - totalGasto;
         }
       }
-
       //Nombre de la sucursal
       Sucursal.findById({ _id: sucursal }, (err, sucursalBD) => {
         if (err) {
@@ -353,8 +352,95 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
       });
     });
 });
+//petición http, para editar todos los comprobantes
+app.put("/editar/comprobantes", [verificaToken, verificaRol], (req, res) => {
+  //Buscar todos los arqueos de la base de datos
+  Arqueo.find((err, arqueosBD) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        err,
+      });
+    }
+    //recorrer los arqueos uno por uno
+    for (arqueo of arqueosBD) {
+      //asignar todos los comprobantes a nuevoComprobantes
+      let nuevoComprobantes = arqueo.comprobantes;
+      //Recorrer todos los comprobantes uno por uno
+      for (comprobante of nuevoComprobantes) {
+        //Editar el comprobante de cada comprobante
+        //stringFormat(comprobante): string; retorna el string si es un array, o string si es un string
+        comprobante.comprobante = stringFormat(comprobante.comprobante);
+      }
+      //actualizar los arqueos
+      Arqueo.findByIdAndUpdate(
+        arqueo._id,
+        { comprobantes: nuevoComprobantes },
+        { new: true },
+        (err, arqueoUpdate) => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              err,
+            });
+          }
+          console.log(arqueoUpdate);
+        }
+      );
+    }
+    //se realizo toda la actualización con exito
+    res.status(200).json({
+      ok: true,
+      message: "La actualización de comprobantes se realizo con exito",
+    });
+  });
+});
 //Funciones
-function fecha_formatISODate(fechaString) {
+/*Si es un array lo convierte a string*/
+function stringFormat(comprobante) {
+  //Se verifica el tipo de comprobante, si es un string, retorna el comprobante sin editar, si es distinto a string asume que es un array y retorna el primer elemento
+  if (typeof comprobante !== "string") {
+    try {
+      return comprobante[0];
+      console.log(comprobante, comprobante[0]);
+    } catch {
+      return comprobante;
+      console.log("ERROR!! Ocurrio un error durante el proceso");
+    }
+  } else {
+    return comprobante;
+  }
+}
+/* Si un numero contiene puntos se extrae esos puntos, tambien si un monto esta en blanco se devuelve 0*/
+function numberFormat(monto) {
+  if (monto == "") {
+    return 0;
+  }
+  if (monto.includes(".")) {
+    let nuevoMonto = "";
+    let inicio;
+    let fin;
+    while (monto.includes(".")) {
+      inicio = 0;
+      fin = monto.indexOf(".");
+      if (nuevoMonto == "") {
+        nuevoMonto = monto.substr(inicio, fin);
+      } else {
+        nuevoMonto = nuevoMonto + monto.substr(inicio, fin);
+      }
+      inicio = fin + 1;
+      if (inicio > monto.length) {
+        break;
+      }
+      monto = monto.substr(inicio);
+    }
+    nuevoMonto = nuevoMonto + monto;
+    return parseInt(nuevoMonto);
+  } else {
+    return parseInt(monto);
+  }
+}
+function fechaFormatISODate(fechaString) {
   /**
    * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
    * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
@@ -416,7 +502,7 @@ app.get("/cambiarT", (req, res) => {
       let MM = fecha.getMonth();
       let yyyy = fecha.getFullYear();
 
-      let fechaISO = fecha_formatISODate(`${yyyy}-${MM + 1}-${dd}`);
+      let fechaISO = fechaFormatISODate(`${yyyy}-${MM + 1}-${dd}`);
 
       let newFecha = new Date(fechaISO);
       let options = {
