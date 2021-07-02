@@ -29,7 +29,6 @@ const iniciarSesion = (req = request, res = response) => {
         msg: "Usuario o Contraseña incorrecta",
       });
     }
-    console.log(usuarioBD);
     let token = jwt.sign(
       {
         usuarioBD,

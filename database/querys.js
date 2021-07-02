@@ -14,7 +14,6 @@ const productosMasVendidosDelDia = async () => {
       day = "0" + day.toString();
     }
     const condicion = year.toString() + month + day;
-    console.log(`Fecha: ${day}/${month}/${year.toString()} `);
     // make sure that any items are correctly URL encoded in the connection string
     await sql.connect(sqlConfig);
     const result = await sql.query`SELECT codigobarra, nombreproducto, SUM(cantidad) as "cantidad" 
@@ -24,7 +23,6 @@ const productosMasVendidosDelDia = async () => {
     ORDER BY 3 DESC
     OFFSET 0 ROWS
     FETCH FIRST 10 ROWS ONLY`;
-    console.log("Productos más vendidos del día");
     let productos = [];
     for (let row of result.recordset) {
       productos.push({
