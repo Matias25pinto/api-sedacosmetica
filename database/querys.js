@@ -4,13 +4,15 @@ const sqlConfig = require("./config");
 const productosMasVendidosDelDia = async () => {
   try {
     //agregamos zona horaria de paraguay
-    let fecha = new Date().toLocaleString("es-PY", {
+    let fechaString = new Date().toLocaleString("es-PY", {
       timeZone: "America/Asuncion",
     });
-
-    let year = fecha.getFullYear();
-    let month = fecha.getMonth() + 1;
-    let day = fecha.getDate();
+    //La fecha se convierte a un string que vamos transformando
+    let fechaArray = fechaString.split("/");
+    let yearHour = fechaArray[2].split(" ");
+    let year = yearHour[0];
+    let month = fechaArray[1];
+    let day = fechaArray[0];
     if (month < 10) {
       month = "0" + month.toString();
     }
@@ -34,9 +36,6 @@ const productosMasVendidosDelDia = async () => {
         producto: row.nombreproducto,
       });
     }
-    console.log("Fecha generada: ", fecha);
-    console.log("Condición: ", condicion);
-    console.log("Productos: ", productos);
     return productos;
   } catch (err) {
     console.log("ERROR!!! no se pudo realizar la consulta", err);
