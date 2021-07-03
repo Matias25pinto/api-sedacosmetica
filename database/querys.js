@@ -30,6 +30,9 @@ const productosMasVendidosDelDia = async () => {
         producto: row.nombreproducto,
       });
     }
+    console.log("Fecha generada: ", fecha);
+    console.log("Condición: ", condicion);
+    console.log("Productos: ", productos);
     return productos;
   } catch (err) {
     console.log("ERROR!!! no se pudo realizar la consulta", err);
