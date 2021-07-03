@@ -3,7 +3,11 @@ const sqlConfig = require("./config");
 
 const productosMasVendidosDelDia = async () => {
   try {
-    let fecha = new Date();
+    //agregamos zona horaria de paraguay
+    let fecha = new Date().toLocaleString("es-PY", {
+      timeZone: "America/Asuncion",
+    });
+
     let year = fecha.getFullYear();
     let month = fecha.getMonth() + 1;
     let day = fecha.getDate();
