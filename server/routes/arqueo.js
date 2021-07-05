@@ -352,7 +352,7 @@ app.get("/arqueo/reporte/ventas/:sucursal", (req, res) => {
       });
     });
 });
-//petición http, para editar todos los comprobantes
+//petición http, para editar todos los comprobantes, para editar todos los comprobantes a la vez
 app.put("/editar/comprobantes", [verificaToken, verificaRol], (req, res) => {
   //Buscar todos los arqueos de la base de datos
   Arqueo.find((err, arqueosBD) => {

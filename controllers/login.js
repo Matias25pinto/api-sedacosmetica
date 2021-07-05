@@ -41,4 +41,13 @@ const iniciarSesion = (req = request, res = response) => {
   });
 };
 
-module.exports = { iniciarSesion };
+const loginVerificar = (req = request, res = response) => {
+  let usuario = req.usuario;
+
+  res.status(200).json({
+    ok: true,
+    usuario,
+  });
+};
+
+module.exports = { iniciarSesion, loginVerificar };

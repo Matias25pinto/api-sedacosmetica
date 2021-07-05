@@ -10,6 +10,8 @@ class Server {
     this.port = process.env.PORT;
     this.productosPath = "/api/productos";
     this.loginPath = "/api/login";
+    this.arqueosPath = "/api/arqueos";
+    this.sucursalesPath = "/api/sucursales";
     //Conectar a BD
     this.connectBD();
     //middlewares
@@ -41,6 +43,12 @@ class Server {
 
     //Rutas de Login
     this.app.use(this.loginPath, require("../routes/login"));
+
+    //Rutas de arqueos
+    this.app.use(this.arqueosPath, require("../routes/arqueos"));
+
+    //Rutas de sucursales
+    this.app.use(this.sucursalesPath, require("../routes/sucursal"));
   }
 
   middleware() {
