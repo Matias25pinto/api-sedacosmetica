@@ -12,7 +12,8 @@ const {
   deleteArqueo,
   setComprobantes,
   deleteComprobante,
-  reportes
+  reportes,
+  buscarComprobantes,
 } = require("../controllers/arqueos");
 
 const router = Router();
@@ -36,4 +37,6 @@ router.put(
 //reportes
 router.get("/reporte/ventas/:sucursal", [verificarToken], reportes);
 
+//Busquedas
+router.get("/comprobantes/buscar", [verificarToken], buscarComprobantes);
 module.exports = router;

@@ -3,7 +3,10 @@ const { request, response } = require("express");
 const Arqueo = require("../models/arqueo");
 const Sucursal = require("../models/sucursal");
 
-const { fechaFormatISODate, numberFormat } = require("../helpers/formatear-fecha");
+const {
+  fechaFormatISODate,
+  numberFormat,
+} = require("../helpers/formatear-fecha");
 
 const getArqueos = (req = request, res = response) => {
   let usuario = req.usuario;
@@ -329,6 +332,29 @@ const reportes = (req = request, res = response) => {
     });
 };
 
+const buscarComprobantes = async (req = request, res = response) => {
+  try {
+    let arqueos = await Arqueo.find();
+    let depositos = [];
+    for (let arqueo of arqueos) {
+      let comprobantes = [];
+      comprobantes = arqueo.comprobantes;
+      for (let comprobante of comprobantes) {
+        if (comprobante.comprobante == "DEPOSITO") {
+          if (comprobante.nroComprobante == "7455295") {
+            depositos.push(comprobante);
+          }
+        }
+      }
+    }
+    res.json({ depositos });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ msg: "ERROR!!! ocurrio un error en el servidor", err });
+  }
+};
+
 module.exports = {
   getArqueos,
   getArqueo,
@@ -336,5 +362,6 @@ module.exports = {
   deleteArqueo,
   setComprobantes,
   deleteComprobante,
-  reportes
+  reportes,
+  buscarComprobantes,
 };
