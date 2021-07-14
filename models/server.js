@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 const cors = require("cors");
 
+
 class Server {
   constructor() {
     this.app = express();
@@ -60,9 +61,10 @@ class Server {
 
   listen() {
     try {
-      this.app.listen(this.port, () => {
-        console.log("El servidor se esta ejecutando en el puerto: ", this.port);
+      this.app.listen(this.port, ()=>{
+	console.log("Servidor montado en el puerto: ",this.port);
       });
+      
     } catch (err) {
       console.log("ERROR!!! no se pudo iniciar el servidor", err);
     }
