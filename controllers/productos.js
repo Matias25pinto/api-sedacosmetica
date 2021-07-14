@@ -62,6 +62,9 @@ const productos = async (req = request, res = response) => {
           productoFormateado["iddeposito"] = producto.iddeposito;
           productoFormateado["codigoDeposito"] = producto.codigo;
           productoFormateado["existencia"] = producto.existencia;
+	  if(req.role === 'ADMIN_ROLE'){
+	    productoFormateado['referencia'] = producto.descripcionale;
+	  }
           let totalPrecios = [];
           for (let precio of precios) {
             let valor = producto[precio];
@@ -86,6 +89,10 @@ const productos = async (req = request, res = response) => {
           productoFormateado["iddeposito"] = producto.iddeposito;
           productoFormateado["codigoDeposito"] = producto.codigo;
           productoFormateado["existencia"] = producto.existencia;
+          if(req.role === 'ADMIN_ROLE'){
+	    productoFormateado['referencia'] = producto.descripcionale;
+	  }
+
           let totalPrecios = [];
           for (let precio of precios) {
             let valor = producto[precio];
@@ -108,4 +115,21 @@ const productos = async (req = request, res = response) => {
   }
 };
 
-module.exports = { productosMasVendidos, productosAgregados, productos };
+const pruebas = async (req=request, res= response)=>{
+  try{
+    let {termino, desde= 0, hasta=10} = req.params;
+    desde = parseInt(desde);
+    hasta = parseInt(hasta);
+    termino = parseInt(termino);
+    let deposito = req.deposito;
+
+    let resp = await prueba(termino, deposito, desde, hasta);
+
+    res.json(resp);
+  }catch(err){
+    console.log("ERROR!!! ocurrio un error en el servidor",err)
+    resp.json({msg:"ERROR!!!", err});
+  }
+}
+
+module.exports = { productosMasVendidos, productosAgregados, productos, pruebas };

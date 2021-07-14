@@ -72,7 +72,7 @@ const nuevosProductos = async () => {
 const buscarProductos = async (termino, iddeposito, desde, hasta) => {
   try {
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT p.codigobarra, p.descripcion,p.empresa, s.iddeposito, d.codigo, s.existencia, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
+    const result = await sql.query`SELECT p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, s.existencia, p.pcosto, p.pcostod, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
    FROM Producto p
     INNER JOIN STKDeposito s
     ON p.id = s.idproducto
@@ -99,7 +99,7 @@ const buscarProductos = async (termino, iddeposito, desde, hasta) => {
 const buscarProductosCB = async (termino, iddeposito, desde, hasta) => {
   try {
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT p.codigobarra, p.descripcion, p.empresa, s.iddeposito, d.codigo, s.existencia, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
+    const result = await sql.query`SELECT p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, s.existencia,p.pcostod, p.pcosto, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
     FROM Producto p
     INNER JOIN STKDeposito s
     ON p.id = s.idproducto
@@ -125,14 +125,8 @@ const buscarProductosCB = async (termino, iddeposito, desde, hasta) => {
 const prueba = async (termino, iddeposito, desde, hasta) => {
   try {
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT  d.codigo
+    const result = await sql.query`SELECT *
     FROM producto p
-    INNER JOIN STKDeposito s
-    ON p.id = s.idproducto
-    INNER JOIN deposito d 
-    ON s.iddeposito = d.id
-    WHERE p.codigobarra = ${termino}
-    AND s.iddeposito = ${iddeposito}
     ORDER BY 1 DESC
     OFFSET ${desde} ROWS 
     FETCH FIRST ${hasta} ROWS ONLY`;
