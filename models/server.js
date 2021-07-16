@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 
 const cors = require("cors");
 
-
 class Server {
   constructor() {
     this.app = express();
@@ -13,6 +12,7 @@ class Server {
     this.loginPath = "/api/login";
     this.arqueosPath = "/api/arqueos";
     this.sucursalesPath = "/api/sucursales";
+    this.comprobantesPath = "/api/comprobantes";
     //Conectar a BD
     this.connectBD();
     //middlewares
@@ -50,6 +50,9 @@ class Server {
 
     //Rutas de sucursales
     this.app.use(this.sucursalesPath, require("../routes/sucursal"));
+
+    //Rutas de comprobantes
+    this.app.use(this.comprobantesPath, require("../routes/comprobantes"));
   }
 
   middleware() {
@@ -61,10 +64,9 @@ class Server {
 
   listen() {
     try {
-      this.app.listen(this.port, ()=>{
-	console.log("Servidor montado en el puerto: ",this.port);
+      this.app.listen(this.port, () => {
+        console.log("Servidor montado en el puerto: ", this.port);
       });
-      
     } catch (err) {
       console.log("ERROR!!! no se pudo iniciar el servidor", err);
     }

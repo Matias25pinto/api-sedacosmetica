@@ -22,7 +22,8 @@ const productosMasVendidosDelDia = async () => {
     const condicion = year.toString() + month + day;
     // make sure that any items are correctly URL encoded in the connection string
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT codigobarra, nombreproducto, SUM(cantidad) as "cantidad" 
+    const result =
+      await sql.query`SELECT codigobarra, nombreproducto, SUM(cantidad) as "cantidad" 
     FROM VENTAS_SMARKET_VIEW 
     WHERE fecha = ${condicion} 
     GROUP BY codigobarra, nombreproducto 
@@ -72,7 +73,8 @@ const nuevosProductos = async () => {
 const buscarProductos = async (termino, iddeposito, desde, hasta) => {
   try {
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, s.existencia, p.pcosto, p.pcostod, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
+    const result =
+      await sql.query`SELECT p.id, p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, SUM(s.existencia) as "existencia", p.pcosto, p.pcostod, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
    FROM Producto p
     INNER JOIN STKDeposito s
     ON p.id = s.idproducto
@@ -81,9 +83,11 @@ const buscarProductos = async (termino, iddeposito, desde, hasta) => {
     WHERE p.empresa = 4
     AND s.iddeposito = ${iddeposito}
     AND PATINDEX ('%' + CAST(${termino} AS VARCHAR) +'%',p.descripcion)  !=0
-    ORDER BY p.id DESC
-    OFFSET ${desde} ROWS 
-    FETCH FIRST ${hasta} ROWS ONLY`;
+    GROUP BY p.id, p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, p.pcostod, p.pcosto, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
+    ORDER BY 1 DESC
+    OFFSET ${desde} ROWS
+    FETCH FIRST ${hasta} ROWS ONLY
+    `;
     let productos = [];
     for (let row of result.recordset) {
       productos.push(row);
@@ -99,7 +103,8 @@ const buscarProductos = async (termino, iddeposito, desde, hasta) => {
 const buscarProductosCB = async (termino, iddeposito, desde, hasta) => {
   try {
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, s.existencia,p.pcostod, p.pcosto, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
+    const result =
+      await sql.query`SELECT p.id, p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, SUM(s.existencia) as "existencia",p.pcostod, p.pcosto, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
     FROM Producto p
     INNER JOIN STKDeposito s
     ON p.id = s.idproducto
@@ -108,8 +113,9 @@ const buscarProductosCB = async (termino, iddeposito, desde, hasta) => {
     WHERE p.empresa = 4
     AND s.iddeposito = ${iddeposito}
     AND p.codigobarra = ${termino}
-    ORDER BY p.id DESC
-    OFFSET ${desde} ROWS 
+    GROUP BY p.id, p.codigobarra, p.descripcion, p.descripcionale, p.empresa, s.iddeposito, d.codigo, p.pcostod, p.pcosto, p.preven, p.preven2, p.preven3, p.preven4, p.preven5, p.preven6, p.preven7, p.preven8, p.preven9, p.preven10, p.preven11, p.preven12, p.preven13, p.preven14, p.preven15, p.preven16, p.preven17, p.preven18, p.preven19, p.preven20
+    ORDER BY 1 DESC
+    OFFSET ${desde} ROWS
     FETCH FIRST ${hasta} ROWS ONLY`;
     let productos = [];
     for (let row of result.recordset) {

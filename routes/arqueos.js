@@ -14,6 +14,7 @@ const {
   deleteComprobante,
   reportes,
   buscarComprobantes,
+  nuevaBaseDatos
 } = require("../controllers/arqueos");
 
 const router = Router();
@@ -40,3 +41,6 @@ router.get("/reporte/ventas/:sucursal", [verificarToken], reportes);
 //Busquedas
 router.get("/comprobantes/buscar", [verificarToken], buscarComprobantes);
 module.exports = router;
+
+//Crear base de datos de comprobantes
+router.get("/comprobantes/nueva-base-datos", [verificarToken, verificarAdminRol], nuevaBaseDatos);

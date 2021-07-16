@@ -2,7 +2,7 @@ const { request, response } = require("express");
 
 const Arqueo = require("../models/arqueo");
 const Sucursal = require("../models/sucursal");
-
+const Comprobante = require("../models/comprobante");
 const {
   fechaFormatISODate,
   numberFormat,
@@ -110,12 +110,12 @@ const deleteArqueo = (req = request, res = response) => {
 const setComprobantes = (req = request, res = response) => {
   let id = req.params.id;
   let body = req.body;
-  let fechaBody = new Date(body.fPago);
+  let fechaBody = new Date(body.fArqueo);
   let yyyy = fechaBody.getFullYear();
   let MM = fechaBody.getMonth();
   let dd = fechaBody.getDate();
-  let fPago = new Date(fechaFormatISODate(`${yyyy}-${MM + 1}-${dd}`));
-  body.fPago = fPago;
+  let fArqueo = new Date(fechaFormatISODate(`${yyyy}-${MM + 1}-${dd}`));
+  body.fArqueo = fArqueo;
   let comprobantes = [];
   let usuarios = [];
   let noAgregarUsuario = false;
@@ -355,6 +355,96 @@ const buscarComprobantes = async (req = request, res = response) => {
   }
 };
 
+const nuevaBaseDatos = async (req = request, res = response) => {
+  const arqueos = await Arqueo.find({ anulado: false });
+
+  //comprobantes es un arreglo de arreglos de comprobantes
+  const comprobantes = arqueos.map((arqueo) => {
+    return arqueo.comprobantes.map((comprobante) => {
+      comprobante["fArqueo"] = arqueo.fecha;
+      comprobante["sucursal"] = arqueo.sucursal;
+      comprobante["monto"] = parseInt(comprobante.monto);
+      if (!comprobante.monto) {
+        comprobante.monto = 0;
+      }
+      if (comprobante.comprobante == "DEPOSITO") {
+        if (comprobante.banco == "") {
+          comprobante.banco = "CAMPO EN BLANCO";
+        }
+        if (comprobante.cuentaBancaria == "") {
+          comprobante.cuentaBancaria = "CAMPO EN BLANCO";
+        }
+        if (comprobante.nroComprobante == "") {
+          comprobante.nroComprobante = "CAMPO EN BLANCO";
+        }
+        if (comprobante.fPago == "") {
+          comprobante.fPago = "CAMPO EN BLANCO";
+        }
+      }
+      if (comprobante.comprobante == "TARJETA") {
+        if (comprobante.boleta == "") {
+          comprobante.boleta = "CAMPO EN BLANCO";
+        }
+        if (comprobante.fPago == "") {
+          comprobante.fPago = "CAMPO EN BLANCO";
+        }
+      }
+      if (comprobante.comprobante == "SALARIO") {
+        if (comprobante.cedula == "." || Array.isArray(comprobante.cedula)) {
+          comprobante.cedula = "CAMPO EN BLANCO";
+        }
+
+        if (comprobante.cargo == "." || Array.isArray(comprobante.cargo)) {
+          comprobante.cargo = "CAMPO EN BLANCO";
+        }
+        if (
+          comprobante.tipoComprobante == "." ||
+          Array.isArray(comprobante.tipoComprobante)
+        ) {
+          comprobante.tipoComprobante = "CAMPO EN BLANCO";
+        }
+        if (comprobante.nroComprobante == ".") {
+          comprobante.nroComprobante = "CAMPO EN BLANCO";
+        }
+        if (comprobante.observacion == ".") {
+          comprobante.observacion = "CAMPO EN BLANCO";
+        }
+      }
+      if (comprobante.comprobante == "DESCUENTO") {
+        if (comprobante.autorizaNA == " " || comprobante.autorizaNA == ".") {
+          comprobante.autorizaNA = "CAMPO EN BLANCO";
+        }
+        if (comprobante.autorizaCI == " " || comprobante.autorizaCI == ".") {
+          comprobante.autorizaCI = "CAMPO EN BLANCO";
+        }
+        if (comprobante.empleadoCI == " " || comprobante.empleadoCI == ".") {
+          comprobante.empleadoCI = "CAMPO EN BLANCO";
+        }
+      }
+      return comprobante;
+    });
+  });
+  let comprobantesUnificados = [];
+  //Unificar todos los comprobantes en un solo arreglo
+  for (let arregloComprobante of comprobantes) {
+    arregloComprobante.map((comprobante) => {
+      comprobantesUnificados.push(comprobante);
+      return;
+    });
+  }
+  return res.json({ msg: "No se cargo en la Base de Datos" });
+  let contador = 0;
+  let longitudArrelgo = comprobantesUnificados.length;
+  for await (let comprobante of comprobantesUnificados) {
+    let comprobanteLocal = new Comprobante(comprobante);
+    let comprobanteBD = await comprobanteLocal.save();
+    contador++;
+  }
+
+  console.log(`Contador: ${contador}, Longitud: ${longitudArrelgo}`);
+  res.json(comprobantesUnificados);
+};
+
 module.exports = {
   getArqueos,
   getArqueo,
@@ -364,4 +454,5 @@ module.exports = {
   deleteComprobante,
   reportes,
   buscarComprobantes,
+  nuevaBaseDatos,
 };
