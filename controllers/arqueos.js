@@ -8,6 +8,11 @@ const {
   numberFormat,
 } = require("../helpers/formatear-fecha");
 
+const {
+  calcularArqueo,
+  calcularArqueoPorSucursal,
+} = require("../database/querys");
+
 const getArqueos = (req = request, res = response) => {
   let usuario = req.usuario;
   let condicion = { anulado: false };
@@ -445,6 +450,20 @@ const nuevaBaseDatos = async (req = request, res = response) => {
   res.json(comprobantesUnificados);
 };
 
+const generarArqueos = async (req = request, res = response) => {
+  let {desde, hasta, codigoSucursal=undefined} = req.body;
+  let fecha1 = new Date(desde);
+  let fecha2 = new Date(hasta);
+  let arqueos;
+  if (codigoSucursal) {
+    arqueos = await calcularArqueoPorSucursal(fecha1, fecha2, codigoSucursal);
+  } else {
+    arqueos = await calcularArqueo(fecha1, fecha2);
+  }
+
+  res.json(arqueos);
+};
+
 module.exports = {
   getArqueos,
   getArqueo,
@@ -455,4 +474,5 @@ module.exports = {
   reportes,
   buscarComprobantes,
   nuevaBaseDatos,
+  generarArqueos,
 };

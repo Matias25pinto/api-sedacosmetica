@@ -21,6 +21,7 @@ const setSucursales = (req = request, res = response) => {
   let body = req.body;
   const sucursal = new Sucursal({
     titulo: body.titulo,
+    codigosucursal: body.codigosucursal,
     direccion: body.direccion,
     tel: body.tel,
     cel: body.cel,

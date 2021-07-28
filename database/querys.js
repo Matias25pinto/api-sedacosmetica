@@ -1,6 +1,8 @@
 const sql = require("mssql");
 const sqlConfig = require("./config");
 
+const { fechaQuery } = require("../helpers/formatear-fecha");
+
 const productosMasVendidosDelDia = async () => {
   try {
     //agregamos zona horaria de paraguay
@@ -128,14 +130,21 @@ const buscarProductosCB = async (termino, iddeposito, desde, hasta) => {
   }
 };
 
-const prueba = async (termino, iddeposito, desde, hasta) => {
+const calcularArqueo = async (
+  desde = new Date(),
+  hasta = new Date(),
+) => {
   try {
+    const fecha1 = fechaQuery(desde);
+    const fecha2 = fechaQuery(hasta);
+    // make sure that any items are correctly URL encoded in the connection string
     await sql.connect(sqlConfig);
-    const result = await sql.query`SELECT *
-    FROM producto p
-    ORDER BY 1 DESC
-    OFFSET ${desde} ROWS 
-    FETCH FIRST ${hasta} ROWS ONLY`;
+    const result =
+      await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "Tot.Costo", SUM((ROUND(precioneto,0))*cantidad) as "Tot.Venta", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "Tot.Utilidad"
+      FROM VENTAS_SMARKET_VIEW 
+      WHERE fecha BETWEEN ${fecha1} AND ${fecha2} 
+      GROUP BY codigosucursal, nombresucursal
+      ORDER BY 1`;
     let productos = [];
     for (let row of result.recordset) {
       productos.push(row);
@@ -147,10 +156,40 @@ const prueba = async (termino, iddeposito, desde, hasta) => {
   }
 };
 
+const calcularArqueoPorSucursal = async (
+  desde = new Date(),
+  hasta = new Date(),
+  codigoSucursal = 1,
+) => {
+  try {
+    const fecha1 = fechaQuery(desde);
+    const fecha2 = fechaQuery(hasta);
+    // make sure that any items are correctly URL encoded in the connection string
+    await sql.connect(sqlConfig);
+    const result =
+      await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "Tot.Costo", SUM((ROUND(precioneto,0))*cantidad) as "Tot.Venta", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "Tot.Utilidad"
+      FROM VENTAS_SMARKET_VIEW 
+      WHERE fecha BETWEEN ${fecha1} AND ${fecha2} 
+      AND codigosucursal = ${codigoSucursal}
+      GROUP BY codigosucursal, nombresucursal
+      ORDER BY 1`;
+    let productos = [];
+    for (let row of result.recordset) {
+      productos.push(row);
+    }
+    return productos;
+  } catch (err) {
+    console.log("ERROR!!! no se pudo realizar la consulta", err);
+    return [];
+  }
+};
+
+
 module.exports = {
   productosMasVendidosDelDia,
   nuevosProductos,
   buscarProductos,
   buscarProductosCB,
-  prueba,
+  calcularArqueo,
+  calcularArqueoPorSucursal
 };

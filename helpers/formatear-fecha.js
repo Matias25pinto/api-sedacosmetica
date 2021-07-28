@@ -61,4 +61,24 @@ const fechaFormatISODate = (fechaString) => {
   return fecha;
 };
 
-module.exports = { stringFormat, numberFormat, fechaFormatISODate };
+const fechaQuery = (fecha) => {
+  //agregamos zona horaria de paraguay
+  let fechaString = fecha.toLocaleString("es-PY", {
+    timeZone: "America/Asuncion",
+  });
+  //La fecha se convierte a un string que vamos transformando
+  let fechaArray = fechaString.split("/");
+  let yearHour = fechaArray[2].split(" ");
+  let year = yearHour[0];
+  let month = fechaArray[1];
+  let day = fechaArray[0];
+  if (month < 10) {
+    month = "0" + month.toString();
+  }
+  if (day < 10) {
+    day = "0" + day.toString();
+  }
+  return year.toString() + month + day;
+};
+
+module.exports = { stringFormat, numberFormat, fechaFormatISODate, fechaQuery };

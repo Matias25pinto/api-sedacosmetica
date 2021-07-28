@@ -14,12 +14,13 @@ const {
   deleteComprobante,
   reportes,
   buscarComprobantes,
-  nuevaBaseDatos
+  nuevaBaseDatos,
+  generarArqueos
 } = require("../controllers/arqueos");
 
 const router = Router();
 
-router.get("/", [verificarToken], getArqueos);
+router.get("/", [verificarToken], generarArqueos);//Generar arqueos de forma dinamica
 
 router.get("/:id", [verificarToken], getArqueo);
 

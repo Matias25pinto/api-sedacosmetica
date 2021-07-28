@@ -9,6 +9,10 @@ const SucursalSchema = new Schema({
     required: [true, "El titulo es obligatorio"],
     unique: true,
   },
+  codigosucursal: {
+    type: Number,
+    required: [true, "El codigosucursal es obligatorio"],
+  },
   direccion: {
     type: String,
     required: [true, "La dirección es obligatoria"],
