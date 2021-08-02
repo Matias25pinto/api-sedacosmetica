@@ -47,7 +47,8 @@ const fechaFormatISODate = (fechaString) => {
    * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
    * **/
   let arrelgoFecha = fechaString.split("-");
-  let dd = arrelgoFecha[2];
+  let ddHora = arrelgoFecha[2].split("T");
+  let dd = ddHora[0];
   let mm = arrelgoFecha[1];
   let yyyy = arrelgoFecha[0];
 

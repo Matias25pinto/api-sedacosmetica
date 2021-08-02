@@ -214,7 +214,123 @@ const deleteComprobante = (req = request, res = response) => {
   });
 };
 
-const reportes = (req = request, res = response) => {
+const reportes = async (req = request, res = response) => {
+  try {
+    let sucursal = req.params.sucursal;
+    //calcular rango de fecha
+    let start = req.get("start");
+    let end = req.get("end");
+
+    if (!start || !end) {
+      return res.status(500).json({
+        ok: false,
+        err: {
+          message: "Falta fecha desde o fecha hasta",
+        },
+      });
+    }
+    //{ $gte: start, $lte: end }, la fecha debe ser mayor o igual que y menor o igual
+    let condicion = {
+      sucursal: sucursal,
+      fArqueo: {
+        $gte: fechaFormatISODate(start),
+        $lte: fechaFormatISODate(end),
+      },
+    };
+
+    let fecha1 = new Date(start);
+    let fecha2 = new Date(end);
+    let { codigosucursal, titulo } = await Sucursal.findById(sucursal);
+    let arqueos = await calcularArqueoPorSucursal(
+      fecha1,
+      fecha2,
+      codigosucursal
+    );
+    let arqueo = arqueos[0];
+    let comprobantes = await Comprobante.find(condicion);
+
+    //Total de ventas
+    let montoComprobantes = 0;
+    let totalGasto = 0;
+    let totalRetiro = 0;
+    let totalTarjeta = 0;
+    let totalCheque = 0;
+    let totalDeposito = 0;
+    let ganancia = 0;
+    let comprobantesGasto = [];
+    let comprobanteRetiro = [];
+    let comprobanteTarjeta = [];
+    let comprobanteCheque = [];
+    let comprobantesDeposito = [];
+
+    for await (const comprobante of comprobantes) {
+      if (
+        comprobante.comprobante != "RETIRO" &&
+        comprobante.comprobante != "TARJETA" &&
+        comprobante.comprobante != "CHEQUE" &&
+        comprobante.comprobante != "DEPOSITO"
+      ) {
+        totalGasto = totalGasto + comprobante.monto;
+        comprobantesGasto.push(comprobante);
+      }
+      if (comprobante.comprobante == "RETIRO") {
+        totalRetiro = totalRetiro + comprobante.monto;
+        comprobanteRetiro.push(comprobante);
+      }
+      if (comprobante.comprobante == "TARJETA") {
+        totalTarjeta = totalTarjeta + comprobante.monto;
+        comprobanteTarjeta.push(comprobante);
+      }
+      if (comprobante.comprobante == "CHEQUE") {
+        totalCheque = totalCheque + comprobante.monto;
+        comprobanteCheque.push(comprobante);
+      }
+      if (comprobante.comprobante == "DEPOSITO") {
+        totalDeposito = totalDeposito + comprobante.monto;
+        comprobantesDeposito.push(comprobante);
+      }
+      montoComprobantes = montoComprobantes + comprobante.monto;
+    }
+    let ventaNeta = arqueo.totalVentas;
+    let totalCosto = arqueo.totalCosto;
+    let totalUtilidad = arqueo.totalUtilidad;
+    let totalEfectivo = arqueo.totalVentas - totalGasto;
+    ganancia = totalUtilidad - totalGasto;
+    return res.status(200).json({
+      ok: true,
+      sucursal: titulo,
+      desde: fechaFormatISODate(start),
+      hasta: fechaFormatISODate(end),
+      ventaNeta,
+      costo: totalCosto,
+      totalEfectivo,
+      totalUtilidad,
+      totalGasto,
+      totalRetiro,
+      totalTarjeta,
+      totalCheque,
+      totalDeposito,
+      montoComprobantes,
+      ganancia,
+      comprobantesGasto,
+      comprobanteRetiro,
+      comprobanteTarjeta,
+      comprobanteCheque,
+      comprobantesDeposito,
+    });
+  } catch (err) {
+    console.log(err);
+    if (err) {
+      console.log("ERROR!!!", err);
+      return res.status(500).json({
+        ok: false,
+        err,
+      });
+    }
+  }
+};
+
+const reportesAntiguo = (req = request, res = response) => {
   let sucursal = req.params.sucursal;
   //calcular rango de fecha
   let start = fechaFormatISODate(req.get("start"));
@@ -451,17 +567,23 @@ const nuevaBaseDatos = async (req = request, res = response) => {
 };
 
 const generarArqueos = async (req = request, res = response) => {
-  let {desde, hasta, codigoSucursal=undefined} = req.body;
-  let fecha1 = new Date(desde);
-  let fecha2 = new Date(hasta);
-  let arqueos;
-  if (codigoSucursal) {
-    arqueos = await calcularArqueoPorSucursal(fecha1, fecha2, codigoSucursal);
-  } else {
-    arqueos = await calcularArqueo(fecha1, fecha2);
-  }
+  try {
+    let { desde, hasta, codigoSucursal = undefined } = req.body;
+    let fecha1 = new Date(desde);
+    let fecha2 = new Date(hasta);
+    let arqueos;
+    if (codigoSucursal) {
+      arqueos = await calcularArqueoPorSucursal(fecha1, fecha2, codigoSucursal);
+    } else {
+      arqueos = await calcularArqueo(fecha1, fecha2);
+    }
 
-  res.json(arqueos);
+    res.json(arqueos);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ msg: "ERROR!!! ocurrio un error en el servidor", err });
+  }
 };
 
 module.exports = {

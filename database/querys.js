@@ -130,17 +130,15 @@ const buscarProductosCB = async (termino, iddeposito, desde, hasta) => {
   }
 };
 
-const calcularArqueo = async (
-  desde = new Date(),
-  hasta = new Date(),
-) => {
+const calcularArqueo = async (desde = new Date(), hasta = new Date()) => {
   try {
     const fecha1 = fechaQuery(desde);
     const fecha2 = fechaQuery(hasta);
+
     // make sure that any items are correctly URL encoded in the connection string
     await sql.connect(sqlConfig);
     const result =
-      await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "Tot.Costo", SUM((ROUND(precioneto,0))*cantidad) as "Tot.Venta", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "Tot.Utilidad"
+      await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "totalCosto", SUM((ROUND(precioneto,0))*cantidad) as "totalVentas", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "totalUtilidad"
       FROM VENTAS_SMARKET_VIEW 
       WHERE fecha BETWEEN ${fecha1} AND ${fecha2} 
       GROUP BY codigosucursal, nombresucursal
@@ -159,16 +157,14 @@ const calcularArqueo = async (
 const calcularArqueoPorSucursal = async (
   desde = new Date(),
   hasta = new Date(),
-  codigoSucursal = 1,
-) => {
+  codigoSucursal) => {
   try {
     const fecha1 = fechaQuery(desde);
     const fecha2 = fechaQuery(hasta);
-    // make sure that any items are correctly URL encoded in the connection string
     await sql.connect(sqlConfig);
     const result =
-      await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "Tot.Costo", SUM((ROUND(precioneto,0))*cantidad) as "Tot.Venta", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "Tot.Utilidad"
-      FROM VENTAS_SMARKET_VIEW 
+      await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "totalCosto", SUM((ROUND(precioneto,0))*cantidad) as "totalVentas", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "totalUtilidad"
+ FROM VENTAS_SMARKET_VIEW 
       WHERE fecha BETWEEN ${fecha1} AND ${fecha2} 
       AND codigosucursal = ${codigoSucursal}
       GROUP BY codigosucursal, nombresucursal
@@ -184,12 +180,11 @@ const calcularArqueoPorSucursal = async (
   }
 };
 
-
 module.exports = {
   productosMasVendidosDelDia,
   nuevosProductos,
   buscarProductos,
   buscarProductosCB,
   calcularArqueo,
-  calcularArqueoPorSucursal
+  calcularArqueoPorSucursal,
 };

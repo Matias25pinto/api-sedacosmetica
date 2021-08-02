@@ -19,30 +19,24 @@ const getComprobantes = async (req = request, res = response) => {
       condicion["sucursal"] = sucursal;
     }
     if (fechaDesde && fechaHasta) {
-      let fecha1 = new Date(fechaDesde);
-      let fecha2 = new Date(fechaHasta);
+      let fecha1 = new Date(fechaFormatISODate(fechaDesde));
+      let fecha2 = new Date(fechaFormatISODate(fechaHasta));
       condicion["fArqueo"] = {
-        $gte: new Date(
-          fechaFormatISODate(
-            `${fecha1.getFullYear()}-${fecha1.getMonth()}-${fecha1.getDate()}`
-          )
-        ),
-        $lte: new Date(
-          fechaFormatISODate(
-            `${fecha2.getFullYear()}-${fecha2.getMonth()}-${fecha2.getDate()}`
-          )
-        ),
+        $gte: fecha1,
+        $lte: fecha2,
       };
     }
     if (comprobante) {
       condicion["comprobante"] = comprobante;
     }
     let comprobantes = await Comprobante.find(condicion)
+      .sort({ fArqueo: -1 })
       .skip(desde)
       .limit(hasta);
     let cantidadComprobantes = await Comprobante.countDocuments(condicion);
     res.json({ cantidadComprobantes, comprobantes });
   } catch (err) {
+    console.log("ERROR!!!", err);
     return res
       .status(500)
       .json({ msg: "ERROR!!! ocurrio un error en el servidor", err });
@@ -63,7 +57,12 @@ const getComprobante = async (req = request, res = response) => {
 
 const crearComprobante = async (req = request, res = response) => {
   try {
-    res.json({ msg: "Funciona el controlador de crearComprobante" });
+    let data = req.body;
+    data.fArqueo = fechaFormatISODate(data.fArqueo);
+    console.log(data);
+    let comprobante = new Comprobante(data);
+    let comprobanteBD = await comprobante.save();
+    res.json(comprobanteBD);
   } catch (err) {
     return res
       .status(500)
@@ -83,7 +82,9 @@ const modificarComprobante = async (req = request, res = response) => {
 
 const eliminarComprobante = async (req = request, res = response) => {
   try {
-    res.json({ msg: "Funciona el controlador de eliminarComprobante" });
+    const id = req.params.id;
+    let comprobanteEliminado = await Comprobante.findByIdAndDelete(id);
+    res.json(comprobanteEliminado);
   } catch (err) {
     return res
       .status(500)
