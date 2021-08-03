@@ -4,14 +4,12 @@ const Comprobante = require("../models/comprobante");
 
 const getComprobantes = async (req = request, res = response) => {
   try {
-    let {
-      desde = 0,
-      hasta = 10,
-      sucursal = undefined,
-      fechaDesde = undefined,
-      fechaHasta = undefined,
-      comprobante = undefined,
-    } = req.body;
+    let desde = req.get("desde") || 0;
+    let hasta = req.get("hasta") || 10;
+    let sucursal = req.get("sucursal") || undefined;
+    let fechaDesde = req.get("fechaDesde") || undefined;
+    let fechaHasta = req.get("fechaHasta") || undefined;
+    let comprobante = req.get("comprobante") || undefined;
     desde = parseInt(desde);
     hasta = parseInt(hasta);
     let condicion = {};
@@ -29,17 +27,18 @@ const getComprobantes = async (req = request, res = response) => {
     if (comprobante) {
       condicion["comprobante"] = comprobante;
     }
-    let comprobantes = await Comprobante.find(condicion)
-      .sort({ fArqueo: -1 })
-      .skip(desde)
-      .limit(hasta);
-    let cantidadComprobantes = await Comprobante.countDocuments(condicion);
+    let [cantidadComprobantes, comprobantes] = await Promise.all([
+      Comprobante.countDocuments(condicion),
+      Comprobante.find(condicion)
+        .sort({ fArqueo: -1 })
+        .skip(desde)
+        .limit(hasta),
+    ]);
+
     res.json({ cantidadComprobantes, comprobantes });
   } catch (err) {
     console.log("ERROR!!!", err);
-    return res
-      .status(500)
-      .json({ msg: "ERROR!!! ocurrio un error en el servidor", err });
+    return res.json({ cantidadComprobantes: 0, comprobantes: [] });
   }
 };
 
@@ -59,7 +58,6 @@ const crearComprobante = async (req = request, res = response) => {
   try {
     let data = req.body;
     data.fArqueo = fechaFormatISODate(data.fArqueo);
-    console.log(data);
     let comprobante = new Comprobante(data);
     let comprobanteBD = await comprobante.save();
     res.json(comprobanteBD);

@@ -12,6 +12,7 @@ const {
   calcularArqueo,
   calcularArqueoPorSucursal,
 } = require("../database/querys");
+const arqueo = require("../models/arqueo");
 
 const getArqueos = (req = request, res = response) => {
   let usuario = req.usuario;
@@ -237,16 +238,20 @@ const reportes = async (req = request, res = response) => {
         $lte: fechaFormatISODate(end),
       },
     };
-
+    let { codigosucursal, titulo } = await Sucursal.findById(sucursal);
     let fecha1 = new Date(start);
     let fecha2 = new Date(end);
-    let { codigosucursal, titulo } = await Sucursal.findById(sucursal);
+    let arqueo = { totalVentas: 0, totalCosto: 0, totalUtilidad: 0 };
     let arqueos = await calcularArqueoPorSucursal(
       fecha1,
       fecha2,
       codigosucursal
     );
-    let arqueo = arqueos[0];
+    //Si existe arqueo de esa sucursal se asigna el valor, si no se deja todo con valor cero.
+    if (arqueos.length > 0) {
+      arqueo = arqueos[0];
+    }
+
     let comprobantes = await Comprobante.find(condicion);
 
     //Total de ventas
