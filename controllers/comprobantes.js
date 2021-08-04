@@ -58,10 +58,14 @@ const crearComprobante = async (req = request, res = response) => {
   try {
     let data = req.body;
     data.fArqueo = fechaFormatISODate(data.fArqueo);
+    if (data.fDeposito) {
+      data.fDeposito = fechaFormatISODate(data.fDeposito);
+    }
     let comprobante = new Comprobante(data);
     let comprobanteBD = await comprobante.save();
     res.json(comprobanteBD);
   } catch (err) {
+    console.log("ERROR!!!", err);
     return res
       .status(500)
       .json({ msg: "ERROR!!! ocurrio un error en el servidor" });
