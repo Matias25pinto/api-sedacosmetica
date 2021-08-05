@@ -231,6 +231,7 @@ const reportes = async (req = request, res = response) => {
       });
     }
     //{ $gte: start, $lte: end }, la fecha debe ser mayor o igual que y menor o igual
+    //Dar formato a start y end
     let condicion = {
       sucursal: sucursal,
       fArqueo: {
