@@ -219,9 +219,8 @@ const reportes = async (req = request, res = response) => {
   try {
     let sucursal = req.params.sucursal;
     //calcular rango de fecha
-    let start = req.get("start");
-    let end = req.get("end");
-
+    let start = `${req.get("start")}T04:00:00.000Z`;
+    let end = `${req.get("end")}T04:00:00.000Z`;
     if (!start || !end) {
       return res.status(500).json({
         ok: false,
