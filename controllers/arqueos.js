@@ -6,7 +6,7 @@ const Comprobante = require("../models/comprobante");
 const {
   fechaFormatISODate,
   numberFormat,
-  convertirT04
+  convertirT04,
 } = require("../helpers/formatear-fecha");
 
 const {
@@ -221,7 +221,9 @@ const reportes = async (req = request, res = response) => {
     let sucursal = req.params.sucursal;
     //calcular rango de fecha
     let start = req.get("start");
+    start = convertirT04(start);
     let end = req.get("end");
+    end = convertirT04(end);
     if (!start || !end) {
       return res.status(500).json({
         ok: false,
