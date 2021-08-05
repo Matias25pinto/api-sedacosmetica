@@ -69,6 +69,35 @@ const fechaFormatISODate = (fechaString) => {
   return fecha;
 };
 
+const convertirT04 = (fechaString) => {
+  /**
+   * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
+   * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
+   * **/
+  let arrelgoFecha = fechaString.split("-");
+  let dd;
+  if (arrelgoFecha[2].includes("T")) {
+    let ddHora;
+    ddHora = arrelgoFecha[2].split("T");
+    dd = ddHora[0];
+  } else {
+    dd = arrelgoFecha[2];
+  }
+
+  let mm = arrelgoFecha[1];
+  let yyyy = arrelgoFecha[0];
+
+  if (dd < 10 && dd.length == 1) {
+    dd = "0" + dd;
+  }
+  if (mm < 10 && mm.length == 1) {
+    mm = "0" + mm;
+  }
+  let fecha = `${yyyy}-${mm}-${dd}T04:00:00.000Z`;
+  return fecha;
+};
+
+
 const fechaQuery = (fecha) => {
   //agregamos zona horaria de paraguay
   let fechaString = fecha.toLocaleString("es-PY", {
@@ -89,4 +118,4 @@ const fechaQuery = (fecha) => {
   return year.toString() + month + day;
 };
 
-module.exports = { stringFormat, numberFormat, fechaFormatISODate, fechaQuery };
+module.exports = { stringFormat, numberFormat, fechaFormatISODate, fechaQuery, convertirT04 };
