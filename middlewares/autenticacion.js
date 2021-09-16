@@ -1,20 +1,30 @@
 const jwt = require("jsonwebtoken");
+const Usuario = require("../models/usuario");
 //Verificar el token
 let verificarToken = (req, res, next) => {
-  let token = req.get("token"); // de esta forma se lee los headers
+	try {
+		let token = req.get("token"); // de esta forma se lee los headers
 
-  jwt.verify(token, process.env.SEED, (err, decode) => {
-    if (err) {
-      return res.status(401).json({
-        ok: false,
-        message: "Error de Token",
-        err,
-      });
-    }
-    req.usuario = decode.usuarioBD; // guardamos el usuario que realiza el cambio para poder verificar su rol
-    next();
-  });
+		jwt.verify(token, process.env.SEED, async (err, decode) => {
+			if (err) {
+				return res.status(401).json({
+					ok: false,
+					message: "Error de Token",
+					err,
+				});
+			}
+			const id = decode._id;
+			const usuario = await Usuario.findById(id);
+			req.usuario = usuario; // guardamos el usuario que realiza el cambio para poder verificar su rol
+			next();
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
 };
+
+
 
 let verificarAdminRol = (req, res, next) => {
   let usuario = req.usuario;

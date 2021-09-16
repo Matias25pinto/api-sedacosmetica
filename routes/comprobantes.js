@@ -23,6 +23,6 @@ router.post("/", [verificarToken], crearComprobante);
 
 router.put("/:id", [verificarToken, verificarAdminRol], modificarComprobante);
 
-router.delete("/:id", [verificarToken, verificarAdminRol], eliminarComprobante);
+router.delete("/:id", [verificarToken], eliminarComprobante);
 
 module.exports = router;

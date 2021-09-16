@@ -41,7 +41,8 @@ router.get("/reporte/ventas/:sucursal", [verificarToken], reportes);
 
 //Busquedas
 router.get("/comprobantes/buscar", [verificarToken], buscarComprobantes);
-module.exports = router;
 
 //Crear base de datos de comprobantes
 router.get("/comprobantes/nueva-base-datos", [verificarToken, verificarAdminRol], nuevaBaseDatos);
+
+module.exports = router;
