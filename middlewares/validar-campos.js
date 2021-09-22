@@ -12,17 +12,25 @@ const validarPrecios = async (req = request, res = response, next) => {
 		let token = req.get("token"); // de esta forma se lee los headers
 		if (token) {
 			jwt.verify(token, process.env.SEED, async (err, decode) => {
-				const id = decode._id;
-				const usuario = await Usuario.findById(id);
-				if (!err) {
-					precios = usuario["precios"];
-					role = usuario["role"];
-					deposito = usuario["deposito"];
+				try {
+					const id = decode._id;
+
+					const usuario = await Usuario.findById(id);
+					if (!err) {
+						precios = usuario["precios"];
+						role = usuario["role"];
+						deposito = usuario["deposito"];
+					}
+					req.precios = precios;
+					req.deposito = deposito;
+					req.role = role;
+					next();
+				} catch {
+					req.precios = precios;
+					req.deposito = deposito;
+					req.role = role;
+					next();
 				}
-				req.precios = precios;
-				req.deposito = deposito;
-				req.role = role;
-				next();
 			});
 		} else {
 			req.precios = precios;
@@ -31,6 +39,7 @@ const validarPrecios = async (req = request, res = response, next) => {
 			next();
 		}
 	} catch (err) {
+		console.log(err);
 		req.precios = precios;
 		req.deposito = deposito;
 		req.role = role;

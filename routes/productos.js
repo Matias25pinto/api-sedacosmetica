@@ -16,8 +16,4 @@ router.get("/nuevos-productos", [], productosAgregados);
 
 router.get("/buscar", [validarPrecios], productos);
 
-router.get("/prueba/buscar", [validarPrecios], pruebas);
-
-
-
 module.exports = router;
