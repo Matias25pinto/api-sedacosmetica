@@ -26,12 +26,12 @@ const productosMasVendidosDelDia = async () => {
 		await sql.connect(sqlConfig);
 		const result =
 			await sql.query`SELECT codigobarra, nombreproducto, SUM(cantidad) as "cantidad" 
-    FROM VENTAS_SMARKET_VIEW 
-    WHERE fecha = ${condicion} 
-    GROUP BY codigobarra, nombreproducto 
-    ORDER BY 3 DESC
-    OFFSET 0 ROWS
-    FETCH FIRST 10 ROWS ONLY`;
+                                        FROM VENTAS_SMARKET_VIEW 
+                                        WHERE fecha = ${condicion} 
+                                        GROUP BY codigobarra, nombreproducto 
+                                        ORDER BY 3 DESC
+                                        OFFSET 0 ROWS
+                                        FETCH FIRST 10 ROWS ONLY`;
 		let productos = [];
 		for (let row of result.recordset) {
 			productos.push({
@@ -51,11 +51,11 @@ const nuevosProductos = async () => {
 	try {
 		await sql.connect(sqlConfig);
 		const result = await sql.query`SELECT codigobarra, descripcion, empresa
-    FROM Producto 
-    WHERE empresa = 4
-    ORDER BY id DESC
-    OFFSET 0 ROWS 
-    FETCH FIRST 10 ROWS ONLY`;
+                                               FROM Producto 
+                                               WHERE empresa = 4
+                                               ORDER BY id DESC
+                                               OFFSET 0 ROWS 
+                                               FETCH FIRST 10 ROWS ONLY`;
 		let productos = [];
 		for (let row of result.recordset) {
 			productos.push({
@@ -144,11 +144,21 @@ const calcularArqueo = async (desde = new Date(), hasta = new Date()) => {
 		// make sure that any items are correctly URL encoded in the connection string
 		await sql.connect(sqlConfig);
 		const result =
-			await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "totalCosto", SUM((ROUND(precioneto,0))*cantidad) as "totalVentas", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "totalUtilidad"
-      FROM VENTAS_SMARKET_VIEW 
-      WHERE fecha BETWEEN ${fecha1} AND ${fecha2} 
-      GROUP BY codigosucursal, nombresucursal
-      ORDER BY 1`;
+			await sql.query`SELECT su.codigo AS "codigosucursal", ltrim(rtrim(su.descripcion)) nombresucursal ,  SUM(a.cantidad) AS "cantidad", 
+                                        SUM(pr.pcosto*a.cantidad) AS "totalCosto", 
+                                        SUM((ROUND(a.precioneto,0))*a.cantidad) AS "totalVentas", 
+                                        SUM(((ROUND(a.precioneto,0))*a.cantidad)-(pr.pcosto*a.cantidad)) AS "totalUtilidad"
+                                        FROM Facturadet a
+                                        INNER JOIN Factura fa ON fa.id=a.idfactura
+                                        LEFT OUTER JOIN STKTipoMov tm ON tm.id=fa.idstktipomov
+                                        INNER JOIN producto pr ON pr.id=a.idproducto
+                                        INNER JOIN Deposito de ON de.id=fa.iddeposito
+                                        INNER JOIN Sucursal su ON su.id=de.idsucursal
+                                        LEFT OUTER JOIN Cliente cl ON cl.id=fa.idcliente
+                                        WHERE fa.tipo='VE'
+                                        AND fa.estado=0
+                                        AND fa.fecha BETWEEN ${fecha1} AND ${fecha2} 
+                                        GROUP BY su.codigo, su.descripcion;`;
 		let productos = [];
 		for (let row of result.recordset) {
 			productos.push(row);
@@ -170,12 +180,22 @@ const calcularArqueoPorSucursal = async (
 		const fecha2 = fechaQuery(hasta);
 		await sql.connect(sqlConfig);
 		const result =
-			await sql.query`SELECT codigosucursal, nombresucursal,  SUM(cantidad) as "cantidad", SUM(costo*cantidad) as "totalCosto", SUM((ROUND(precioneto,0))*cantidad) as "totalVentas", SUM(((ROUND(precioneto,0))*cantidad)-(costo*cantidad)) as "totalUtilidad"
- FROM VENTAS_SMARKET_VIEW 
-      WHERE fecha BETWEEN ${fecha1} AND ${fecha2} 
-      AND codigosucursal = ${codigoSucursal}
-      GROUP BY codigosucursal, nombresucursal
-      ORDER BY 1`;
+			await sql.query`SELECT su.codigo AS "codigosucursal", ltrim(rtrim(su.descripcion)) nombresucursal ,  SUM(a.cantidad) AS "cantidad", 
+                                        SUM(pr.pcosto*a.cantidad) AS "totalCosto", 
+                                        SUM((ROUND(a.precioneto,0))*a.cantidad) AS "totalVentas", 
+                                        SUM(((ROUND(a.precioneto,0))*a.cantidad)-(pr.pcosto*a.cantidad)) AS "totalUtilidad"
+                                        FROM Facturadet a
+                                        INNER JOIN Factura fa ON fa.id=a.idfactura
+                                        LEFT OUTER JOIN STKTipoMov tm ON tm.id=fa.idstktipomov
+                                        INNER JOIN producto pr ON pr.id=a.idproducto
+                                        INNER JOIN Deposito de ON de.id=fa.iddeposito
+                                        INNER JOIN Sucursal su ON su.id=de.idsucursal
+                                        LEFT OUTER JOIN Cliente cl ON cl.id=fa.idcliente
+                                        WHERE fa.tipo='VE'
+                                        AND fa.estado=0
+                                        AND fa.fecha BETWEEN ${fecha1} AND ${fecha2} 
+                                        AND su.codigo = ${codigoSucursal}
+                                        GROUP BY su.codigo, su.descripcion;`;
 		let productos = [];
 		for (let row of result.recordset) {
 			productos.push(row);
