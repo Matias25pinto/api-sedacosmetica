@@ -13,6 +13,7 @@ class Server {
 		this.sucursalesPath = "/api/sucursales";
 		this.comprobantesPath = "/api/comprobantes";
 		this.usuariosPath = "/api/usuarios";
+		this.bancosPath = "/api/bancos";
 		//Conectar a BD
 		this.connectBD();
 		//middlewares
@@ -41,7 +42,7 @@ class Server {
 	routes() {
 		//Rutas de productos
 		this.app.use(this.productosPath, require("../routes/productos"));
-		
+
 		//Rutas de arqueos
 		this.app.use(this.arqueosPath, require("../routes/arqueos"));
 
@@ -52,8 +53,10 @@ class Server {
 		this.app.use(this.comprobantesPath, require("../routes/comprobantes"));
 
 		//Rutas de usuarios
-	        this.app.use(this.usuariosPath, require("../routes/usuario"));
+		this.app.use(this.usuariosPath, require("../routes/usuario"));
 
+		//Rutas para los bancos
+		this.app.use(this.bancosPath, require("../routes/banco"));
 	}
 
 	middleware() {
