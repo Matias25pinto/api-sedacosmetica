@@ -40,8 +40,11 @@ const modificarBanco = async (req = request, res = response) => {
 
 const bancos = async (req = request, res = response) => {
 	try {
+		let { desde = 0, limite = 1000 } = req.query;
+		desde = parseInt(desde);
+		limite = parseInt(limite);
 		const estado = true;
-		const bancos = await Banco.find({ estado });
+		const bancos = await Banco.find({ estado }).skip(desde).limit(limite);
 		return res.json(bancos);
 	} catch (err) {
 		console.log(err);

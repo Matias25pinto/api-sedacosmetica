@@ -14,6 +14,7 @@ class Server {
 		this.comprobantesPath = "/api/comprobantes";
 		this.usuariosPath = "/api/usuarios";
 		this.bancosPath = "/api/bancos";
+		this.cuentasPath = "/api/cuentas";
 		//Conectar a BD
 		this.connectBD();
 		//middlewares
@@ -57,6 +58,9 @@ class Server {
 
 		//Rutas para los bancos
 		this.app.use(this.bancosPath, require("../routes/banco"));
+
+		//Ruta para las cuentas
+		this.app.use(this.cuentasPath, require("../routes/cuenta"));
 	}
 
 	middleware() {

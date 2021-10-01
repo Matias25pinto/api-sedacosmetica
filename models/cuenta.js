@@ -4,19 +4,20 @@ const uniqueValidator = require("mongoose-unique-validator");
 const Schema = mongoose.Schema;
 
 const CuentaSchema = new Schema({
-	cuenta: {
-		type: String,
-		required: [true, "El campo cuenta es obligatorio"],
-		unique: true,
-	},
 	banco: {
 		type: Schema.Types.ObjectId,
 		ref: "Banco",
-		required: [true, "El campo banco es obligatorio"],
+		required: [true, "El campo banco es obligatoria"],
 	},
-	desc: {
+	titular: {
 		type: String,
-		required: [true, "El campo desc es obligatorio"],
+		required: [true, "El campo titular es obligatorio"],
+	},
+	nroCuenta: { type: String, required: [true, "El campo cuenta es obligatorio"] },
+	estado: {
+		type: Boolean,
+		required: [true, "El campo estado es obligatorio"],
+		default: true,
 	},
 });
 
