@@ -40,11 +40,15 @@ const modificarBanco = async (req = request, res = response) => {
 
 const bancos = async (req = request, res = response) => {
 	try {
-		let { desde = 0, limite = 1000 } = req.query;
+		let { desde = 0, limite = 1000, nombre = "" } = req.query;
 		desde = parseInt(desde);
 		limite = parseInt(limite);
-		const estado = true;
-		const bancos = await Banco.find({ estado }).skip(desde).limit(limite);
+		let condicion = {};
+		condicion["estado"] = true;
+		if (nombre != "") {
+			condicion["nombre"] = nombre;
+		}
+		const bancos = await Banco.find(condicion).skip(desde).limit(limite);
 		return res.json(bancos);
 	} catch (err) {
 		console.log(err);
@@ -75,4 +79,10 @@ const eliminarBancos = async (req = request, res = response) => {
 	}
 };
 
-module.exports = { crearBanco, modificarBanco, bancos, banco, eliminarBancos };
+module.exports = {
+	crearBanco,
+	modificarBanco,
+	bancos,
+	banco,
+	eliminarBancos,
+};
