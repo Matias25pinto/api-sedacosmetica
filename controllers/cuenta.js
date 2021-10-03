@@ -33,9 +33,13 @@ const modificarCuenta = async (req = request, res = response) => {
 const cuentas = async (req = request, res = response) => {
 	try {
 		const banco = req.get("banco");
-		const estado = true;
+		let condicion = {};
+		if (banco != "todo") {
+			condicion["banco"] = banco;
+		}
+		condicion["estado"] = true;
 
-		const cuentas = await Cuenta.find({ estado, banco });
+		const cuentas = await Cuenta.find(condicion);
 
 		return res.json(cuentas);
 	} catch (err) {
