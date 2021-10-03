@@ -32,12 +32,10 @@ const modificarCuenta = async (req = request, res = response) => {
 
 const cuentas = async (req = request, res = response) => {
 	try {
-		let { desde = 0, limite = 1000 } = req.query;
-		desde = parseInt(desde);
-		limite = parseInt(limite);
+		const banco = req.get("banco");
 		const estado = true;
 
-		const cuentas = await Cuenta.find({ estado }).skip(desde).limit(limite);
+		const cuentas = await Cuenta.find({ estado, banco });
 
 		return res.json(cuentas);
 	} catch (err) {

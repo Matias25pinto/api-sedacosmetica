@@ -4,7 +4,9 @@ const Banco = require("../models/banco");
 
 const crearBanco = async (req = request, res = response) => {
 	try {
-		const { nombre, desc } = req.body;
+		let { nombre, desc } = req.body;
+		nombre = nombre.toUpperCase();
+		desc = desc.toUpperCase();
 
 		let banco = new Banco({ nombre, desc });
 
@@ -20,7 +22,10 @@ const crearBanco = async (req = request, res = response) => {
 const modificarBanco = async (req = request, res = response) => {
 	try {
 		const { id } = req.params;
-		const { nombre, desc } = req.body;
+		let { nombre, desc } = req.body;
+		nombre = nombre.toUpperCase();
+		desc = desc.toUpperCase();
+
 		const banco = await Banco.findByIdAndUpdate(
 			id,
 			{ nombre, desc },
@@ -40,15 +45,13 @@ const modificarBanco = async (req = request, res = response) => {
 
 const bancos = async (req = request, res = response) => {
 	try {
-		let { desde = 0, limite = 1000, nombre = "" } = req.query;
-		desde = parseInt(desde);
-		limite = parseInt(limite);
+		let { nombre = "" } = req.query;
 		let condicion = {};
 		condicion["estado"] = true;
 		if (nombre != "") {
-			condicion["nombre"] = nombre;
+			condicion["nombre"] = nombre.toUpperCase();
 		}
-		const bancos = await Banco.find(condicion).skip(desde).limit(limite);
+		const bancos = await Banco.find(condicion);
 		return res.json(bancos);
 	} catch (err) {
 		console.log(err);
