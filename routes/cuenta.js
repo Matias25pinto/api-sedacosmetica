@@ -52,13 +52,9 @@ router.put(
 	modificarCuenta
 );
 
-router.get("/", [verificarToken, verificarAdminRol], cuentas);
+router.get("/", [verificarToken], cuentas);
 
-router.get(
-	"/:id",
-	[validarIdMongoose, verificarToken, verificarAdminRol],
-	cuenta
-);
+router.get("/:id", [validarIdMongoose, verificarToken, validarChecks], cuenta);
 
 router.delete(
 	"/:id",
