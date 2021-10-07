@@ -3,45 +3,101 @@ const { request, response } = require("express");
 const Sucursal = require("../models/sucursal");
 
 const getSucursales = (req = request, res = response) => {
-  Sucursal.find().exec((err, sucursalesBD) => {
-    if (err) {
-      res.status(500).json({
-        ok: false,
-        err,
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      sucursalesBD,
-    });
-  });
+	try {
+		Sucursal.find({ estado: true }).exec((err, sucursalesBD) => {
+			if (err) {
+				res.status(500).json({
+					ok: false,
+					err,
+				});
+			}
+			res.status(200).json({
+				ok: true,
+				sucursalesBD,
+			});
+		});
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
 };
 
-const setSucursales = (req = request, res = response) => {
-  let body = req.body;
-  const sucursal = new Sucursal({
-    titulo: body.titulo,
-    codigosucursal: body.codigosucursal,
-    direccion: body.direccion,
-    tel: body.tel,
-    cel: body.cel,
-    correo: body.correo,
-    img: body.img,
-  });
-
-  sucursal.save((err, sucursalBD) => {
-    if (err) {
-      res.status(500).json({
-        ok: false,
-        err,
-      });
-    }
-    res.status(200).json({
-      ok: true,
-      sucursalBD,
-      usuario: req.usuario,
-    });
-  });
+const getSucursal = async (req = request, res = response) => {
+	try {
+		const { id } = req.params;
+		const sucursal = await Sucursal.findById(id);
+		res.json(sucursal);
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
 };
 
-module.exports = { getSucursales, setSucursales };
+const crearSucursal = async (req = request, res = response) => {
+	try {
+		const { titulo, codigosucursal, direccion, tel, cel, correo, img } =
+			req.body;
+		const sucursal = new Sucursal({
+			titulo,
+			codigosucursal,
+			direccion,
+			tel,
+			cel,
+			correo,
+			img,
+		});
+
+		await sucursal.save();
+
+		res.json(sucursal);
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
+};
+
+const modificarSucursal = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { titulo, codigosucursal, direccion, tel, cel, correo, img } =
+			req.body;
+
+		const sucursal = await Sucursal.findByIdAndUpdate(
+			id,
+			{ titulo, codigosucursal, direccion, tel, cel, correo, img },
+			{ new: true }
+		);
+
+		res.json(sucursal);
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
+};
+
+const eliminarSucursal = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const estado = false;
+
+		const sucursal = await Sucursal.findByIdAndUpdate(
+			id,
+			{ estado },
+			{ new: true }
+		);
+
+		res.json(sucursal);
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
+};
+
+module.exports = {
+	getSucursales,
+	getSucursal,
+	crearSucursal,
+	modificarSucursal,
+	eliminarSucursal,
+};
