@@ -2,20 +2,11 @@ const { request, response } = require("express");
 
 const Sucursal = require("../models/sucursal");
 
-const getSucursales = (req = request, res = response) => {
+const getSucursales = async (req = request, res = response) => {
 	try {
-		Sucursal.find({ estado: true }).exec((err, sucursalesBD) => {
-			if (err) {
-				res.status(500).json({
-					ok: false,
-					err,
-				});
-			}
-			res.status(200).json({
-				ok: true,
-				sucursalesBD,
-			});
-		});
+		const estado = true;
+		const sucursales = await Sucursal.find({ estado });
+		res.json(sucursales);
 	} catch (err) {
 		console.log(err);
 		return res.status(500).json({ err });
