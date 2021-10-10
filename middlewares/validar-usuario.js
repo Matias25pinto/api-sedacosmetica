@@ -1,15 +1,44 @@
-const jwt = require("jsonwebtoken");
 const Usuario = require("../models/usuario");
-let verificarAdminRole = (req, res, next) => {
-	let usuario = req.usuario;
-	if (usuario.role == "ADMIN_ROLE") {
+
+const verificarEmail = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const { email } = req.body;
+		const existeEmail = await Usuario.findOne({ email });
+		if (existeEmail) {
+			if (existeEmail._id != id) {
+				return res.status(404).json({
+					msg: "ERROR, el email ya esta siendo utilizado en otra cuenta",
+				});
+			}
+		}
 		next();
-		return;
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
 	}
-	res.status(500).json({
-		ok: false,
-		message: "El usuario necesita permiso de administrador",
-	});
 };
 
-module.exports = { verificarToken, verificarAdminRole };
+const verificarCedula = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const { cedula } = req.body;
+		const existeCedula = await Usuario.findOne({ cedula });
+		if (existeCedula) {
+			if (existeCedula._id != id) {
+				return res.status(404).json({
+					msg: "ERROR, La cédula ya esta siendo utilizado en otra cuenta",
+				});
+			}
+		}
+		next();
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ err });
+	}
+};
+
+module.exports = {
+	verificarEmail,
+	verificarCedula,
+};

@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt"); // Importamos bcrypt para poder comparar dos p
 
 const jwt = require("jsonwebtoken"); // Importamos jwt para poder crear Json Web Tokens
 
-
 const Usuario = require("../models/usuario");
 
 const login = async (req = request, res = response) => {
@@ -62,4 +61,106 @@ const getUsuario = async (req = request, res = response) => {
 	}
 };
 
-module.exports = { getUsuarios, getUsuario, login };
+const crearUsuario = async (req = request, res = response) => {
+	try {
+		const {
+			nombre,
+			apellido,
+			cedula,
+			celular,
+			email,
+			role,
+			sucursal,
+			precios,
+			deposito,
+		} = req.body;
+		let password = bcrypt.hashSync(req.body.password, 10);
+		const usuario = new Usuario({
+			nombre,
+			apellido,
+			cedula,
+			celular,
+			email,
+			password,
+			role,
+			sucursal,
+			precios,
+			deposito,
+		});
+
+		await usuario.save();
+
+		res.json(usuario);
+	} catch (err) {
+		console.log("ERROR!!!", err);
+		return res.status(500).json({ err });
+	}
+};
+
+const modificarUsuario = async (req = request, res = response) => {
+	try {
+		const { id } = req.params;
+		const {
+			nombre,
+			apellido,
+			cedula,
+			celular,
+			email,
+			role,
+			sucursal,
+			precios,
+			deposito,
+		} = req.body;
+
+		const usuario = await Usuario.findByIdAndUpdate(
+			id,
+			{
+				nombre,
+				apellido,
+				cedula,
+				celular,
+				email,
+				role,
+				sucursal,
+				precios,
+				deposito,
+			},
+			{ new: true }
+		);
+		if (!usuario) {
+			return res
+				.status(400)
+				.json({ msg: `No existe el usuario con id: ${id}` });
+		}
+
+		res.json(usuario);
+	} catch (err) {
+		console.log("ERROR!!!", err);
+		return res.status(500).json({ err });
+	}
+};
+
+const eliminarUsuario = async (req = request, res = response) => {
+	try {
+		const { id } = req.params;
+		const estado = false;
+		const usuario = await Usuario.findByIdAndUpdate(
+			id,
+			{ estado },
+			{ new: true }
+		);
+		return res.json(usuario);
+	} catch (err) {
+		console.log("ERROR!!!", err);
+		return res.status(500).json({ err });
+	}
+};
+
+module.exports = {
+	getUsuarios,
+	getUsuario,
+	login,
+	crearUsuario,
+	modificarUsuario,
+	eliminarUsuario,
+};

@@ -2,10 +2,33 @@ const { Router } = require("express");
 
 const { check } = require("express-validator");
 
-const { verificarToken } = require("../middlewares/autenticacion");
-const { getUsuarios, getUsuario, login } = require("../controllers/usuario");
-const { validarChecks, validarIdMongoose } = require("../middlewares/validar-campos");
-const { existeEmail } = require("../helpers/validar-bd");
+const {
+	verificarToken,
+	verificarAdminRol,
+} = require("../middlewares/autenticacion");
+
+const {
+	verificarEmail,
+	verificarCedula,
+} = require("../middlewares/validar-usuario");
+
+const {
+	getUsuarios,
+	getUsuario,
+	login,
+	crearUsuario,
+	modificarUsuario,
+	eliminarUsuario,
+} = require("../controllers/usuario");
+const {
+	validarChecks,
+	validarIdMongoose,
+} = require("../middlewares/validar-campos");
+const {
+	existeEmail,
+	existeRole,
+	existeSucursal,
+} = require("../helpers/validar-bd");
 const router = Router();
 
 router.post(
@@ -18,8 +41,57 @@ router.post(
 	],
 	login
 );
+router.put(
+	"/:id",
+	[
+		verificarToken,
+		verificarAdminRol,
+		validarIdMongoose,
+		verificarEmail,
+		verificarCedula,
+		check("nombre").not().isEmpty(),
+		check("apellido").not().isEmpty(),
+		check("cedula").not().isEmpty(),
+		check("celular").not().isEmpty(),
+		check("email").isEmail().not().isEmpty(),
+		check("role").custom(existeRole),
+		check("sucursal").custom(existeSucursal),
+		check("precios").not().isEmpty(),
+		check("deposito").not().isEmpty(),
+		validarChecks,
+	],
+	modificarUsuario
+);
 router.get("/", [verificarToken], getUsuarios);
 
 router.get("/usuario/:id", [verificarToken, validarIdMongoose], getUsuario);
+
+router.post(
+	"/",
+	[
+		verificarToken,
+		verificarAdminRol,
+		verificarEmail,
+		verificarCedula,
+		check("nombre").not().isEmpty(),
+		check("apellido").not().isEmpty(),
+		check("cedula").not().isEmpty(),
+		check("celular").not().isEmpty(),
+		check("email").isEmail().not().custom(existeEmail),
+		check("password").not().isEmpty().isLength({ min: 8 }),
+		check("role").custom(existeRole),
+		check("sucursal").custom(existeSucursal),
+		check("precios").not().isEmpty(),
+		check("deposito").not().isEmpty(),
+		validarChecks,
+	],
+	crearUsuario
+);
+
+router.delete(
+	"/:id",
+	[verificarToken, verificarAdminRol, validarIdMongoose],
+	eliminarUsuario
+);
 
 module.exports = router;
