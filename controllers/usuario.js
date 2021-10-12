@@ -67,6 +67,7 @@ const crearUsuario = async (req = request, res = response) => {
 			nombre,
 			apellido,
 			cedula,
+			ruc,
 			celular,
 			email,
 			role,
@@ -79,6 +80,7 @@ const crearUsuario = async (req = request, res = response) => {
 			nombre,
 			apellido,
 			cedula,
+			ruc,
 			celular,
 			email,
 			password,
@@ -104,6 +106,7 @@ const modificarUsuario = async (req = request, res = response) => {
 			nombre,
 			apellido,
 			cedula,
+			ruc,
 			celular,
 			email,
 			role,
@@ -118,6 +121,7 @@ const modificarUsuario = async (req = request, res = response) => {
 				nombre,
 				apellido,
 				cedula,
+				ruc,
 				celular,
 				email,
 				role,
@@ -156,6 +160,22 @@ const eliminarUsuario = async (req = request, res = response) => {
 	}
 };
 
+const cambiarPassword = async (req = request, res = response) => {
+	try {
+		const { id } = req.params;
+		let password = bcrypt.hashSync(req.body.password, 10);
+		const usuario = await Usuario.findByIdAndUpdate(
+			id,
+			{ password },
+			{ new: true }
+		);
+		return res.json(usuario);
+	} catch (err) {
+		console.log("ERROR!!!", err);
+		return res.status(500).json({ err });
+	}
+};
+
 module.exports = {
 	getUsuarios,
 	getUsuario,
@@ -163,4 +183,5 @@ module.exports = {
 	crearUsuario,
 	modificarUsuario,
 	eliminarUsuario,
+	cambiarPassword,
 };

@@ -19,6 +19,7 @@ const {
 	crearUsuario,
 	modificarUsuario,
 	eliminarUsuario,
+	cambiarPassword,
 } = require("../controllers/usuario");
 const {
 	validarChecks,
@@ -41,6 +42,18 @@ router.post(
 	],
 	login
 );
+router.put(
+	"/cambiar-password/:id",
+	[
+		verificarToken,
+		verificarAdminRol,
+		validarIdMongoose,
+		check("password").not().isEmpty(),
+		validarChecks,
+	],
+	cambiarPassword
+);
+
 router.put(
 	"/:id",
 	[

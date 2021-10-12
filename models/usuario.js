@@ -24,7 +24,7 @@ let usuarioSchema = new Schema({
 		require: false,
 	},
 	celular: {
-		type: Number,
+		type: String,
 		require: [true, "El celular es obligatorio"],
 	},
 	email: {
@@ -69,12 +69,13 @@ let usuarioSchema = new Schema({
 });
 
 //Eliminamos el password del JSON, de esta forma cuando se consulte el modelo el password nunca sera visible
-usuarioSchema.methods.toJSON = function () {
+/*usuarioSchema.methods.toJSON = function () {
 	let user = this;
 	let userObject = user.toObject();
 	delete userObject.password;
 	return userObject;
 };
+*/
 usuarioSchema.plugin(uniqueValidator, { message: "{PATH} debe de ser único" });
 
 module.exports = mongoose.model("Usuario", usuarioSchema);
