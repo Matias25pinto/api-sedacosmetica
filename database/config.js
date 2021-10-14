@@ -2,7 +2,7 @@ const sqlConfig = {
   user: "consulta",
   password: "Consulta",
   database: "GESCOM",
-  server: "181.127.189.54",
+  server: "181.127.188.12",
   port: 1433,
   pool: {
     max: 10,
