@@ -207,6 +207,40 @@ const calcularArqueoPorSucursal = async (
 	}
 };
 
+const calcularVentasPorSucursal = async (
+	desde = new Date(),
+	hasta = new Date(),
+	codigoSucursal
+) => {
+	try {
+		const fecha1 = fechaQuery(desde);
+		const fecha2 = fechaQuery(hasta);
+		await sql.connect(sqlConfig);
+		const result =
+			await sql.query`SELECT su.codigo AS "codigosucursal", ltrim(rtrim(su.descripcion)) nombresucursal, SUM((ROUND(a.precioneto,0))*a.cantidad) AS "totalVentas"
+FROM Facturadet a
+INNER JOIN Factura fa ON fa.id=a.idfactura
+LEFT OUTER JOIN STKTipoMov tm ON tm.id=fa.idstktipomov
+INNER JOIN producto pr ON pr.id=a.idproducto
+INNER JOIN Deposito de ON de.id=fa.iddeposito
+INNER JOIN Sucursal su ON su.id=de.idsucursal
+LEFT OUTER JOIN Cliente cl ON cl.id=fa.idcliente
+WHERE fa.tipo='VE'
+AND fa.estado=0
+AND fa.fecha BETWEEN ${fecha1} AND ${fecha2} 
+AND su.codigo = ${codigoSucursal}
+GROUP BY su.codigo, su.descripcion;`;
+		let productos = [];
+		for (let row of result.recordset) {
+			productos.push(row);
+		}
+		return productos;
+	} catch (err) {
+		console.log("ERROR!!! no se pudo realizar la consulta", err);
+		return [];
+	}
+};
+
 module.exports = {
 	productosMasVendidosDelDia,
 	nuevosProductos,
@@ -214,4 +248,5 @@ module.exports = {
 	buscarProductosCB,
 	calcularArqueo,
 	calcularArqueoPorSucursal,
+	calcularVentasPorSucursal,
 };

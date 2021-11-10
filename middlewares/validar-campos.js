@@ -79,4 +79,39 @@ const validarIdMongoose = (req, res, next) => {
 	}
 };
 
-module.exports = { validarPrecios, validarChecks, validarIdMongoose };
+const validarObjetivo = (req, res, next) => {
+	//Verificar si el id es un objeto válido de mongoose
+
+	const { sucursal, mes, year } = req.query;
+	try {
+		if (sucursal.length < 12 || !sucursal) {
+			return res
+				.status(400)
+				.json({ msg: `El id: ${sucursal}, no es un id válido de mongoose` });
+		}
+		const idObjeto = new ObjectId(sucursal);
+		if (idObjeto != sucursal) {
+			return res
+				.status(400)
+				.json({ msg: `El id: ${sucursal}, no es un id válido de mongoose` });
+		}
+		if (parseInt(mes) > 12 || parseInt(mes) < 1 || !mes) {
+			return res
+				.status(400)
+				.json({ msg: `El mes: ${mes}, no es un mes válido` });
+		}
+		if (year.length != 4 || !year) {
+			return res
+				.status(400)
+				.json({ msg: `El año: ${year}, no es un año válido` });
+		}
+
+		next();
+	} catch (err) {
+		return res
+			.status(400)
+			.json({ msg: `ERROR!!! ingrese una sucursal, mes, year válido` });
+	}
+};
+
+module.exports = { validarPrecios, validarChecks, validarIdMongoose, validarObjetivo };
