@@ -1,4 +1,5 @@
 const express = require("express");
+const fileUpload = require("express-fileupload");
 
 const mongoose = require("mongoose");
 
@@ -72,6 +73,14 @@ class Server {
 		this.app.use(cors());
 		//Poder enviar JSON
 		this.app.use(express.json());
+		//Para manejar la carga de archivos
+		// Note that this option available for versions 1.0.0 and newer.
+		this.app.use(
+			fileUpload({
+				useTempFiles: true,
+				tempFileDir: "/tmp/",
+			})
+		);
 	}
 
 	listen() {

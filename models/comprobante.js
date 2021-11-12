@@ -126,6 +126,10 @@ const comprobanteSchema = new Schema({
 		type: String,
 		required: false,
 	},
+	img: {
+		type: String,
+		required: false,
+	},
 });
 
 module.exports = mongoose.model("Comprobante", comprobanteSchema);

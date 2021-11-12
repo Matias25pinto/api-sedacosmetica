@@ -1,4 +1,6 @@
 const { request, response } = require("express");
+const cloudinary = require("cloudinary").v2;
+cloudinary.config(process.env.CLOUDINARY_URL);
 const { fechaFormatISODate } = require("../helpers/formatear-fecha");
 const Comprobante = require("../models/comprobante");
 
@@ -74,6 +76,58 @@ const crearComprobante = async (req = request, res = response) => {
 	}
 };
 
+const actualizarImagen = async (req = request, res = response) => {
+	try {
+		const { id } = req.params;
+	        const usuario = req.usuario;
+
+		//Verificar si existe archivo img
+		if (!req.files || Object.keys(req.files).length === 0 || !req.files.img) {
+			return res.status(400).json({ msg: "No existe archivo img" });
+		}
+		let comprobante = await Comprobante.findById(id);
+		if (!comprobante) {
+			return res.status(400).json({ msg: "No existe el comprobante" });
+		}
+		//Validar si se puede actualizar el comprobante
+		let actualizar = false;
+		if (usuario.role == "ADMIN_ROLE") {
+			actualizar = true;
+		} else {
+			let mesComprobante = comprobante.fArqueo.getMonth();
+			let mesActual = new Date().getMonth();
+			if (mesComprobante == mesActual) {
+				actualizar = true;
+			}
+		}
+		if (!actualizar) {
+			return res
+				.status(400)
+				.json({
+					msg: "El rango de fecha permitido para actualizar ya fue superado",
+				});
+		}
+		if (comprobante.img) {
+			//Eliminar la imagen del comprobante antes de subir la nueva img
+			const nombreArr = comprobante.img.split("/");
+			const nombre = nombreArr[nombreArr.length - 1];
+			const [public_id] = nombre.split(".");
+			cloudinary.uploader.destroy(public_id);
+		}
+		//Guardar la imagen en cloudinary
+		const { tempFilePath } = req.files.img;
+		const { secure_url } = await cloudinary.uploader.upload(tempFilePath);
+		comprobante.img = secure_url;
+		await comprobante.save();
+		res.json(comprobante);
+	} catch (err) {
+		console.log(err);
+		return res
+			.status(500)
+			.json({ msg: "ERROR!!! ocurrio un error en el servidor" });
+	}
+};
+
 const modificarComprobante = async (req = request, res = response) => {
 	try {
 		res.json({ msg: "Funciona el controlador de modificarComprobante" });
@@ -87,8 +141,27 @@ const modificarComprobante = async (req = request, res = response) => {
 const eliminarComprobante = async (req = request, res = response) => {
 	try {
 		const id = req.params.id;
-		let comprobanteEliminado = await Comprobante.findByIdAndDelete(id);
-		res.json(comprobanteEliminado);
+		const usuario = req.usuario;
+		//Validar si se puede eliminar el comprobante
+		let eliminar = false;
+		if (usuario.role == "ADMIN_ROLE") {
+			eliminar = true;
+		} else {
+			let comprobante = await Comprobante.findById(id);
+			let mesComprobante = comprobante.fArqueo.getMonth();
+			let mesActual = new Date().getMonth();
+			if (mesComprobante == mesActual) {
+				eliminar = true;
+			}
+		}
+		if (eliminar) {
+			let comprobanteEliminado = await Comprobante.findByIdAndDelete(id);
+			res.json(comprobanteEliminado);
+		} else {
+			return res.status(400).json({
+				msg: "El rango de fecha permitido para eliminar ya fue superado",
+			});
+		}
 	} catch (err) {
 		return res
 			.status(500)
@@ -143,4 +216,5 @@ module.exports = {
 	modificarComprobante,
 	eliminarComprobante,
 	cambiarBancoNroCuenta,
+	actualizarImagen,
 };
