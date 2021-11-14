@@ -5,6 +5,7 @@ const { check } = require("express-validator");
 const {
 	validarIdMongoose,
 	validarChecks,
+	validarIMG,
 } = require("../middlewares/validar-campos");
 
 const {
@@ -34,13 +35,11 @@ router.get("/", [verificarToken], getComprobantes);
 
 router.get("/:id", [verificarToken], getComprobante);
 
-router.post("/", [verificarToken], crearComprobante);
-
-router.put("/:id", [verificarToken, verificarAdminRol], modificarComprobante);
+router.post("/", [verificarToken, validarIMG], crearComprobante);
 
 router.put(
 	"/actualizar-img/:id",
-	[verificarToken, validarIdMongoose],
+	[verificarToken, validarIdMongoose, validarIMG],
 	actualizarImagen
 );
 

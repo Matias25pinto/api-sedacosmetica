@@ -114,4 +114,34 @@ const validarObjetivo = (req, res, next) => {
 	}
 };
 
-module.exports = { validarPrecios, validarChecks, validarIdMongoose, validarObjetivo };
+const validarIMG = (req, res, next) => {
+	try {
+		//Verificar si existe archivo img
+		if (!req.files || Object.keys(req.files).length === 0 || !req.files.img) {
+			return res.status(400).json({ msg: "No existe archivo img" });
+		} else {
+			//Verificar si el formato es válido
+			let name = req.files.img.name;
+			let nameArr = name.split(".");
+			let lastNameArr = nameArr[nameArr.length - 1];
+			const tipoDeDatos = ["jpg", "png", "jpeg"];
+			if (!tipoDeDatos.includes(lastNameArr)) {
+				return res.status(400).json({
+					msg: `El tipo de archivo ${lastNameArr} no es válido, archivos permitidos: ${tipoDeDatos}`,
+				});
+			}
+		}
+		next();
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ msg: `ERROR en validarIMG` });
+	}
+};
+
+module.exports = {
+	validarPrecios,
+	validarChecks,
+	validarIdMongoose,
+	validarObjetivo,
+	validarIMG,
+};

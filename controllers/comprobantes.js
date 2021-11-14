@@ -65,6 +65,12 @@ const crearComprobante = async (req = request, res = response) => {
 		if (data.fDeposito) {
 			data.fDeposito = fechaFormatISODate(data.fDeposito);
 		}
+		//Guardar la imagen en cloudinary
+		const { tempFilePath } = req.files.img;
+		const { secure_url } = await cloudinary.uploader.upload(tempFilePath);
+		data["img"] = secure_url;
+
+		//Crear comprobante
 		let comprobante = new Comprobante(data);
 		let comprobanteBD = await comprobante.save();
 		res.json(comprobanteBD);
@@ -79,12 +85,8 @@ const crearComprobante = async (req = request, res = response) => {
 const actualizarImagen = async (req = request, res = response) => {
 	try {
 		const { id } = req.params;
-	        const usuario = req.usuario;
+		const usuario = req.usuario;
 
-		//Verificar si existe archivo img
-		if (!req.files || Object.keys(req.files).length === 0 || !req.files.img) {
-			return res.status(400).json({ msg: "No existe archivo img" });
-		}
 		let comprobante = await Comprobante.findById(id);
 		if (!comprobante) {
 			return res.status(400).json({ msg: "No existe el comprobante" });
@@ -101,11 +103,9 @@ const actualizarImagen = async (req = request, res = response) => {
 			}
 		}
 		if (!actualizar) {
-			return res
-				.status(400)
-				.json({
-					msg: "El rango de fecha permitido para actualizar ya fue superado",
-				});
+			return res.status(400).json({
+				msg: "El rango de fecha permitido para actualizar ya fue superado",
+			});
 		}
 		if (comprobante.img) {
 			//Eliminar la imagen del comprobante antes de subir la nueva img
