@@ -144,10 +144,13 @@ const eliminarComprobante = async (req = request, res = response) => {
 		const usuario = req.usuario;
 		//Validar si se puede eliminar el comprobante
 		let eliminar = false;
+
+		let comprobante = await Comprobante.findById(id);
+
 		if (usuario.role == "ADMIN_ROLE") {
 			eliminar = true;
 		} else {
-			let comprobante = await Comprobante.findById(id);
+			//Si es el mes actual se podra eliminar el comprobante
 			let mesComprobante = comprobante.fArqueo.getMonth();
 			let mesActual = new Date().getMonth();
 			if (mesComprobante == mesActual) {
@@ -155,6 +158,13 @@ const eliminarComprobante = async (req = request, res = response) => {
 			}
 		}
 		if (eliminar) {
+			if (comprobante.img) {
+				//Eliminar la imagen del comprobante antes de subir la nueva img
+				const nombreArr = comprobante.img.split("/");
+				const nombre = nombreArr[nombreArr.length - 1];
+				const [public_id] = nombre.split(".");
+				await cloudinary.uploader.destroy(public_id);
+			}
 			let comprobanteEliminado = await Comprobante.findByIdAndDelete(id);
 			res.json(comprobanteEliminado);
 		} else {
@@ -163,6 +173,7 @@ const eliminarComprobante = async (req = request, res = response) => {
 			});
 		}
 	} catch (err) {
+		console.log(err);
 		return res
 			.status(500)
 			.json({ msg: "ERROR!!! ocurrio un error en el servidor" });
