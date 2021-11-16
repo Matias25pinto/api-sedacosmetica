@@ -65,6 +65,9 @@ const crearComprobante = async (req = request, res = response) => {
 		if (data.fDeposito) {
 			data.fDeposito = fechaFormatISODate(data.fDeposito);
 		}
+		if (data.fVencimiento) {
+			data.fVencimiento = fechaFormatISODate(data.fVencimiento);
+		}
 		//Guardar la imagen en cloudinary
 		const { tempFilePath } = req.files.img;
 		const { secure_url } = await cloudinary.uploader.upload(tempFilePath);

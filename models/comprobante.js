@@ -106,6 +106,15 @@ const comprobanteSchema = new Schema({
 		type: String,
 		required: false,
 	},
+	bancoCliente: {
+		type: String,
+		required: false,
+	},
+	emisor: {
+		type: String,
+		required: false,
+	},
+
 	chequeNro: {
 		type: String,
 		required: false,
