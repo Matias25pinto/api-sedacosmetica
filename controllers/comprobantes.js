@@ -81,7 +81,7 @@ const crearComprobante = async (req = request, res = response) => {
 		console.log("ERROR!!!", err);
 		return res
 			.status(500)
-			.json({ msg: "ERROR!!! ocurrio un error en el servidor" });
+			.json({ msg: "ERROR!!! ocurrio un error en el servidor", err });
 	}
 };
 
