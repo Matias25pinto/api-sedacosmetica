@@ -2,6 +2,7 @@ const { request, response } = require("express");
 const Objetivo = require("../models/objetivo");
 const Sucursal = require("../models/sucursal");
 const { calcularVentasPorSucursal } = require("../database/querys");
+const { fechaFormatISODate } = require("../helpers/formatear-fecha");
 
 const crearObjetivto = async (req = request, res = response) => {
 	try {
@@ -59,11 +60,45 @@ const objetivo = async (req, res) => {
 		}
 		let sucursalObjeto = await Sucursal.find({ _id: sucursal });
 		//en javascript 11 es diciembre y 0 es enero
+		//para unificar la zona horaria del sistema utilizamos la función fechaFormatISODate()
 		const primerDiaActual = new Date(year, mes - 1, 1);
-		const ultimoDiaActual = new Date(year, mes, 0); //si se envia día cero este devuelve el último día del mes anterior
+		//crear una fecha auxiliar
+		let fechaAuxiliar = new Date(
+			year,
+			parseInt(mes) < 12 ? parseInt(mes) : 12,
+			parseInt(mes) < 12 ? 0 : 31
+		);
+
+		const ultimoDiaActual = new Date(year, mes - 1, fechaAuxiliar.getDate());
+
+		//si se envia día cero este devuelve el último día del mes anterior
 
 		const primerDiaAnterior = new Date(year - 1, mes - 1, 1);
-		const ultimoDiaAnterior = new Date(year - 1, mes, 0);
+		//modificar fecha auxiliar
+		fechaAuxiliar = new Date(
+			year - 1,
+			parseInt(mes) < 12 ? parseInt(mes) : 12,
+			parseInt(mes) < 12 ? 0 : 31
+		);
+
+		const ultimoDiaAnterior = new Date(
+			year - 1,
+			mes - 1,
+			fechaAuxiliar.getDate()
+		);
+
+		console.log(
+			"primerDiaActual:",
+			primerDiaActual,
+			"ultimoDiaActual:",
+			ultimoDiaActual
+		);
+		console.log(
+			"primerDiaAnterior:",
+			primerDiaAnterior,
+			"ultimoDiaAnterior:",
+			ultimoDiaAnterior
+		);
 
 		const [ventasActual, ventasAnterior, objetivos] = await Promise.all([
 			calcularVentasPorSucursal(
