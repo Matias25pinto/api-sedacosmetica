@@ -73,12 +73,9 @@ const objetivo = async (req, res) => {
 		let fechaAuxiliar1 = new Date(year, mesAuxiliar1, diaAuxiliar1);
 		let end = `${year}-${mesAuxiliar1}-${fechaAuxiliar1.getDate()}`;
 
-		console.log("start:", start, "end:", end, fechaAuxiliar1);
-
 		//convertir con convertirT04
 		start = convertirT04(start);
 		end = convertirT04(end);
-		console.log("startT04:", start, "endT04:", end);
 
 		const primerDiaActual = new Date(start);
 		const ultimoDiaActual = new Date(end);
@@ -91,28 +88,12 @@ const objetivo = async (req, res) => {
 		fechaAuxiliar1 = new Date(year - 1, mesAuxiliar1, diaAuxiliar1);
 		end = `${year - 1}-${mesAuxiliar1}-${fechaAuxiliar1.getDate()}`;
 
-		console.log("start:", start, "end:", end, fechaAuxiliar1);
-
 		//convertir con convertirT04
 		start = convertirT04(start);
 		end = convertirT04(end);
-		console.log("startT04:", start, "endT04:", end);
 
 		const primerDiaAnterior = new Date(start);
 		const ultimoDiaAnterior = new Date(end);
-
-		console.log(
-			"primerDiaActual:",
-			primerDiaActual,
-			"ultimoDiaActual:",
-			ultimoDiaActual
-		);
-		console.log(
-			"primerDiaAnterior:",
-			primerDiaAnterior,
-			"ultimoDiaAnterior:",
-			ultimoDiaAnterior
-		);
 
 		const [ventasActual, ventasAnterior, objetivos] = await Promise.all([
 			calcularVentasPorSucursal(

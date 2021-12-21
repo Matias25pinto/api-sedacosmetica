@@ -114,7 +114,6 @@ const fechaQuery = (fecha) => {
 	if (day < 10) {
 		day = "0" + day.toString();
 	}
-	console.log("Fecha query:", year.toString() + month + day);
 	return year.toString() + month + day;
 };
 
