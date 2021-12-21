@@ -2,7 +2,10 @@ const { request, response } = require("express");
 const Objetivo = require("../models/objetivo");
 const Sucursal = require("../models/sucursal");
 const { calcularVentasPorSucursal } = require("../database/querys");
-const { fechaFormatISODate } = require("../helpers/formatear-fecha");
+const {
+	fechaFormatISODate,
+	convertirT04,
+} = require("../helpers/formatear-fecha");
 
 const crearObjetivto = async (req = request, res = response) => {
 	try {
@@ -61,31 +64,42 @@ const objetivo = async (req, res) => {
 		let sucursalObjeto = await Sucursal.find({ _id: sucursal });
 		//en javascript 11 es diciembre y 0 es enero
 		//para unificar la zona horaria del sistema utilizamos la función fechaFormatISODate()
-		const primerDiaActual = new Date(year, mes - 1, 1);
-		//crear una fecha auxiliar
-		let fechaAuxiliar = new Date(
-			year,
-			parseInt(mes) < 12 ? parseInt(mes) : 12,
-			parseInt(mes) < 12 ? 0 : 31
-		);
+		//Tratar fecha de objetivos
+		//Crear las fechas start y end
+		let start = `${year}-${mes}-${1}`; //mes-1;porque en js los meses son de 0 a 11
+		//calcular último día del mes
+		let mesAuxiliar1 = mes < 12 ? mes : 12;
+		let diaAuxiliar1 = mes < 12 ? 0 : 31;
+		let fechaAuxiliar1 = new Date(year, mesAuxiliar1, diaAuxiliar1);
+		let end = `${year}-${mesAuxiliar1}-${fechaAuxiliar1.getDate()}`;
 
-		const ultimoDiaActual = new Date(year, mes - 1, fechaAuxiliar.getDate());
+		console.log("start:", start, "end:", end, fechaAuxiliar1);
 
-		//si se envia día cero este devuelve el último día del mes anterior
+		//convertir con convertirT04
+		start = convertirT04(start);
+		end = convertirT04(end);
+		console.log("startT04:", start, "endT04:", end);
 
-		const primerDiaAnterior = new Date(year - 1, mes - 1, 1);
-		//modificar fecha auxiliar
-		fechaAuxiliar = new Date(
-			year - 1,
-			parseInt(mes) < 12 ? parseInt(mes) : 12,
-			parseInt(mes) < 12 ? 0 : 31
-		);
+		const primerDiaActual = new Date(start);
+		const ultimoDiaActual = new Date(end);
 
-		const ultimoDiaAnterior = new Date(
-			year - 1,
-			mes - 1,
-			fechaAuxiliar.getDate()
-		);
+		////Modificar las fechas start y end
+		start = `${year - 1}-${mes}-${1}`; //mes-1;porque en js los meses son de 0 a 11
+		//calcular último día del mes
+		mesAuxiliar1 = mes < 12 ? mes : 12;
+		diaAuxiliar1 = mes < 12 ? 0 : 31;
+		fechaAuxiliar1 = new Date(year - 1, mesAuxiliar1, diaAuxiliar1);
+		end = `${year - 1}-${mesAuxiliar1}-${fechaAuxiliar1.getDate()}`;
+
+		console.log("start:", start, "end:", end, fechaAuxiliar1);
+
+		//convertir con convertirT04
+		start = convertirT04(start);
+		end = convertirT04(end);
+		console.log("startT04:", start, "endT04:", end);
+
+		const primerDiaAnterior = new Date(start);
+		const ultimoDiaAnterior = new Date(end);
 
 		console.log(
 			"primerDiaActual:",
