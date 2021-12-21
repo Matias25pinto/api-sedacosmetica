@@ -17,7 +17,7 @@ const existeBanco = async (bancoId = "") => {
 };
 
 const existeRole = async (role = "") => {
-	const roles = ["ADMIN_ROLE", "USER_ROLE", "CLIENT_ROLE"];
+	const roles = ["ADMIN_ROLE", "USER_ROLE", "CLIENT_ROLE", "CAJERO_ROLE"];
 	const existe = roles.includes(role);
 	if (!existe) {
 		throw new Error(`No existe el rol ${role}`);
