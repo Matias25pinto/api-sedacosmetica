@@ -19,8 +19,10 @@ const getComprobantes = async (req = request, res = response) => {
 			condicion["sucursal"] = sucursal;
 		}
 		if (fechaDesde && fechaHasta) {
+		
 			let fecha1 = new Date(fechaFormatISODate(fechaDesde));
 			let fecha2 = new Date(fechaFormatISODate(fechaHasta));
+			
 			condicion["fArqueo"] = {
 				$gte: fecha1,
 				$lte: fecha2,
@@ -29,6 +31,7 @@ const getComprobantes = async (req = request, res = response) => {
 		if (comprobante) {
 			condicion["comprobante"] = comprobante;
 		}
+		
 		let [cantidadComprobantes, comprobantes] = await Promise.all([
 			Comprobante.countDocuments(condicion),
 			Comprobante.find(condicion)

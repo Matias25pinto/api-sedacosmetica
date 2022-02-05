@@ -42,6 +42,7 @@ const numberFormat = (monto) => {
 	}
 };
 const fechaFormatISODate = (fechaString) => {
+	
 	/**
 	 * Para poder resolver que la fecha generada en el servidor era T0 y la del local T3
 	 * construi la fecha ISO con un T03 que es como esta guardado las fechas en la BD
@@ -58,7 +59,7 @@ const fechaFormatISODate = (fechaString) => {
 
 	let mm = arrelgoFecha[1];
 	let yyyy = arrelgoFecha[0];
-
+  
 	if (dd < 10 && dd.length == 1) {
 		dd = "0" + dd;
 	}
